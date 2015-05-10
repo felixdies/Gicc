@@ -186,3 +186,6 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# ignore Gicc.Test configuration
+GiccTest/Gicc.Test.dll.config
