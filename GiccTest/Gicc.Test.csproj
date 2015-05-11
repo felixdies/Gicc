@@ -49,10 +49,11 @@
     <Compile Include="ClearCaseTest.cs" />
     <Compile Include="CloneTest.cs" />
     <Compile Include="FileEx.cs" />
+    <Compile Include="GitTest.cs" />
     <Compile Include="IOHandlerTest.cs" />
     <Compile Include="GiccTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PullTest.cs" />
+    <Compile Include="GiccTest.cs" />
     <Compile Include="ResourceHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,16 @@ namespace Gicc
 {
   public class Gicc
   {
+    public static void SetConfig(string vobPath, string branchName, string repoPath)
+		{
+			List<string> config = new List<string>(new string[]{
+				@"vob = " + vobPath
+				, @"branch = " + branchName
+				, @"repository = " + repoPath}
+				);
+			IOHandler.WriteConfig(config);
+		}
+
     public void Pull(DateTime since, DateTime until)
     {
       CheckCheckedOutFileIsNotExist();

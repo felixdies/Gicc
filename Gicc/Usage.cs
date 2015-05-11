@@ -19,5 +19,12 @@ namespace Gicc
 
 		public static string Push
 		{ get { return ResourceHandler.GetResource("usage_push.txt"); } }
+
+    public static string Tree
+    { get { return ResourceHandler.GetResource("usage_tree.txt"); } }
+
+    public static string Label
+    { get { return ResourceHandler.GetResource("usage_label.txt"); } }
+
 	}
 }

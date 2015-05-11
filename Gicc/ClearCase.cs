@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace Gicc
 {
-	class ClearCase
+	public class ClearCase
 	{
 		static string Fmt
 		{
@@ -100,15 +100,27 @@ namespace Gicc
 			Execute("setcs -default");
 		}
 
-		internal static void FindAllElementsInBranch(string pname, string branchName)
+		public static List<string> FindAllFilesInBranch(string pname, string branchName)
 		{
-			string args = string.Empty;
-
+      string args = string.Empty;
+			
 			if (!string.IsNullOrWhiteSpace(branchName))
 				args += " -branch 'brtype(" + branchName + ")'";
 
 			Execute("find " + pname + args + " -print > " + IOHandler.CCoutPath);
+      
+      return IOHandler.ReadCCout();
 		}
+
+    public static void ViewVersionTree(string pname)
+    {
+      Execute("lsvtree -graphical " + pname, false);
+    }
+
+    public static void LabelLatestMain(string pname, string label)
+    {
+      Execute("mklabel -replace -version '\\main\\LATEST' " + pname, false);
+    }
 
 		internal static List<CCElementVersion> FindAllSymbolicLinks()
 		{
@@ -174,7 +186,7 @@ namespace Gicc
 			Execute("uncheckout -keep " + pname);
 		}
 
-		protected static void Execute(string workingDirectory, string arg)
+    protected static void Execute(string workingDirectory, string arg, bool wait = true)
 		{
 			Process cleartool = new Process();
 
@@ -197,12 +209,14 @@ namespace Gicc
 				if (!string.IsNullOrWhiteSpace(err))
 					IOHandler.WriteLog(err);
 			}
-			cleartool.WaitForExit();
+
+      if (wait)
+        cleartool.WaitForExit();
 		}
 
-		protected static void Execute(string arg)
+		protected static void Execute(string arg, bool wait = true)
 		{
-			Execute(IOHandler.VobPath, arg);
+			Execute(IOHandler.VobPath, arg, wait);
 		}
 	}
 

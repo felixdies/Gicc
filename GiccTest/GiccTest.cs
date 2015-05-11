@@ -13,6 +13,11 @@ namespace Gicc.Test
   public class GiccTest : GiccTestBase
   {
     [Test]
+    public void WriteConfigTest()
+    {
+    }
+
+    [Test]
     public void PullTest()
     {
       Gicc gicc = new Gicc();
