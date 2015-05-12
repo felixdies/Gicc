@@ -57,9 +57,9 @@
     <Compile Include="ResourceHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Gicc\Gicc.csproj">
+    <ProjectReference Include="..\Gicc\Gicc.Lib.csproj">
       <Project>{a6cc82af-018d-44ae-82dc-f41ae07c9ee2}</Project>
-      <Name>Gicc</Name>
+      <Name>Gicc.Lib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

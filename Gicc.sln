@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gicc", "Gicc\Gicc.csproj", "{A6CC82AF-018D-44AE-82DC-F41AE07C9EE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gicc.Lib", "Gicc\Gicc.Lib.csproj", "{A6CC82AF-018D-44AE-82DC-F41AE07C9EE2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gicc.Test", "GiccTest\Gicc.Test.csproj", "{EACB11E3-9C9F-4D7F-8F9B-27EF33D2EDE1}"
 EndProject
