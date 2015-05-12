@@ -114,12 +114,12 @@ namespace Gicc
 
     public static void ViewVersionTree(string pname)
     {
-      Execute("lsvtree -graphical " + pname, false);
+      Execute("lsvtree -graphical " + pname + "\\LATEST", false);
     }
 
     public static void LabelLatestMain(string pname, string label)
     {
-      Execute("mklabel -replace -version '\\main\\LATEST' " + pname, false);
+      Execute("mklabel -replace -version \\main\\LATEST " + label + " " + pname, false);
     }
 
 		internal static List<CCElementVersion> FindAllSymbolicLinks()
@@ -203,15 +203,18 @@ namespace Gicc
 			cleartool.StartInfo = proInfo;
 			cleartool.Start();
 			IOHandler.WriteLog("> " + DateTime.Now.ToString("yy-MM-dd HH:mm:ss") + " " + proInfo.Arguments + Environment.NewLine);
-			using (StreamReader errReader = cleartool.StandardError)
+			
+			if (wait)
 			{
-				string err = errReader.ReadToEnd();
-				if (!string.IsNullOrWhiteSpace(err))
-					IOHandler.WriteLog(err);
-			}
+				using (StreamReader errReader = cleartool.StandardError)
+				{
+					string err = errReader.ReadToEnd(); // wait for exit
+					if (!string.IsNullOrWhiteSpace(err))
+						IOHandler.WriteLog(err);
+				}
 
-      if (wait)
-        cleartool.WaitForExit();
+				// cleartool.WaitForExit(); // useless
+			}
 		}
 
 		protected static void Execute(string arg, bool wait = true)

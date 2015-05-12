@@ -80,7 +80,7 @@ namespace Gicc.Console
       BranchFileList.ForEach(filePath => ClearCase.ViewVersionTree(filePath));
 
       if (!gitInitialized)
-        Directory.Delete(gitPath);
+        Directory.Delete(gitPath, true);
     }
 
     static void MakeCCLabel(string branchName, string label)
