@@ -16,7 +16,7 @@ namespace Gicc.Test
 		public void GetResourceTest()
 		{
 			// clone
-			string expected = "usage : gicc clone <CC VOB> <CC branch name> <git 저장소 이름>";
+			string expected = "usage : gicc clone <CC VOB 경로> <CC branch name> <git 저장소 이름>";
 			string actual = ResourceHandler.GetResource("usage_clone.txt");
 
 			Assert.AreEqual(expected, actual);

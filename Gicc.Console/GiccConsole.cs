@@ -85,6 +85,8 @@ namespace Gicc.Console
 
     static void MakeCCLabel(string branchName, string label)
     {
+      // todo: validate label
+
       List<string> targetExtension = new List<string>(new string[] {".aspx", ".ascx", ".js"});
       string gitPath = Path.Combine(Environment.CurrentDirectory, ".git");
       bool gitInitialized = Directory.Exists(gitPath);

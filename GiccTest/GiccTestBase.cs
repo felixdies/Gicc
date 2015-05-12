@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.IO;
 using System.Configuration;
 
 using NUnit.Framework;
@@ -13,18 +14,23 @@ namespace Gicc.Test
 {
 	public class GiccTestBase
 	{
-        protected string VOB_PATH = ConfigurationManager.AppSettings["VobPath"];
+		protected string VOB_PATH = ConfigurationManager.AppSettings["VobPath"];
 		protected string CC_TEST_PATH = ConfigurationManager.AppSettings["CCTestPath"];
-        protected string CC_SYMBOLIC_LINK_PATH = ConfigurationManager.AppSettings["CCSymbolicLinkPath"];
-        protected string BRANCH_NAME = ConfigurationManager.AppSettings["BranchName"];
-        protected string REPO_PATH = ConfigurationManager.AppSettings["RepoPath"];
-			
+		protected string CC_SYMBOLIC_LINK_PATH = ConfigurationManager.AppSettings["CCSymbolicLinkPath"];
+		protected string BRANCH_NAME = ConfigurationManager.AppSettings["BranchName"];
+		protected string REPO_PATH = ConfigurationManager.AppSettings["RepoPath"];
+
 		[SetUp]
 		public void initBase()
 		{
+			string GICC_PATH = Path.Combine(REPO_PATH, ".git/gicc");
+
+			if (!Directory.Exists(GICC_PATH))
+				Directory.CreateDirectory(GICC_PATH);
+
 			SetCwd(REPO_PATH);
 
-			FileEx.BackUp(System.IO.Path.Combine(REPO_PATH, ".git/gicc/config"));
+			FileEx.BackUp(Path.Combine(GICC_PATH, "config"));
 
 			SetConfig(CC_TEST_PATH, BRANCH_NAME, REPO_PATH);
 		}
@@ -56,7 +62,7 @@ namespace Gicc.Test
 		public void ClearUpBase()
 		{
 			// delete config
-            FileEx.Restore(System.IO.Path.Combine(REPO_PATH, ".git/gicc/config"));
+			FileEx.Restore(Path.Combine(REPO_PATH, ".git/gicc/config"));
 		}
 	}
 }

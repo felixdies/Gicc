@@ -20,6 +20,7 @@ namespace Gicc.Test
       FileEx.DeleteIfExists(Path.Combine(REPO_PATH));
 
       throw new NotImplementedException();
+			// todo : initialize git repository
     }
 
     [Test]
