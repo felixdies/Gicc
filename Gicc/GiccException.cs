@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Gicc
 {
-	class GiccException : Exception
+	public class GiccException : Exception
 	{
 		public GiccException()
 		{

@@ -202,7 +202,7 @@ namespace Gicc
 
 			cleartool.StartInfo = proInfo;
 			cleartool.Start();
-			IOHandler.WriteLog("> " + DateTime.Now.ToString("yy-MM-dd HH:mm:ss") + " " + proInfo.Arguments + Environment.NewLine);
+			IOHandler.WriteLog(">>> " + DateTime.Now.ToString("yy-MM-dd HH:mm:ss") + " " + proInfo.Arguments + Environment.NewLine);
 			
 			if (wait)
 			{
@@ -212,8 +212,6 @@ namespace Gicc
 					if (!string.IsNullOrWhiteSpace(err))
 						IOHandler.WriteLog(err);
 				}
-
-				// cleartool.WaitForExit(); // useless
 			}
 		}
 

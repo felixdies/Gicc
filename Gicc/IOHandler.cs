@@ -51,6 +51,11 @@ namespace Gicc
 			get { return Path.Combine(GiccPath, @"ccout"); }
 		}
 
+		internal static string GitoutPath
+		{
+			get { return Path.Combine(GiccPath, @"gitout"); }
+		}
+
 		internal static void WriteLog(string text)
 		{
 			File.AppendAllText(LogPath, text);
@@ -59,6 +64,11 @@ namespace Gicc
 		internal static List<string> ReadCCout()
 		{
 			return new List<string>(File.ReadAllLines(CCoutPath));
+		}
+
+		internal static List<string> ReadGitout()
+		{
+			return new List<string>(File.ReadAllLines(GitoutPath));
 		}
 
 		internal static void WriteConfig(List<string> configList)

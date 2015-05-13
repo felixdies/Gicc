@@ -59,6 +59,14 @@ namespace Gicc.Console
 
     static void Pull()
     {
+			try
+			{
+				new Gicc().Pull(DateTime.Now, DateTime.Now);
+			}
+			catch (GiccException exception)
+			{
+				System.Console.WriteLine(exception.Message);
+			}
     }
 
     static void Push()
