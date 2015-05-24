@@ -97,5 +97,28 @@ namespace Gicc
 		{
 			return IOHandler.ReadConfig().Find(config => config.ToLower().StartsWith(configName)).Split('=').Last().Trim();
 		}
+
+		internal static void Copy(string sourceFileName, string destFileName)
+		{
+			File.Copy(sourceFileName, destFileName, true);
+		}
+
+		internal static string EliminateRepoPath(string path)
+		{
+			return Eliminate(path, RepoPath);
+		}
+
+		internal static string EliminateVobPath(string path)
+		{
+			return Eliminate(path, VobPath);
+		}
+
+		private static string Eliminate(string srcPath, string eliminatedPath)
+		{
+			if (srcPath.StartsWith(eliminatedPath))
+				return srcPath.Remove(0, eliminatedPath.Length);
+			else
+				return srcPath;
+		}
 	}
 }

@@ -20,32 +20,56 @@ namespace Gicc
 
 		public void Pull()
 		{
-			List<CCElementVersion> ccHistory = null;  // foreach FindAllFilesInBranch() - Add LsHistory()
+			List<CCElementVersion> ccHistory = null;
 
-			List<DateTime> commitPoints = GetCommitPoints(ccHistory);
-
-			for (int i = 0; i < commitPoints.Count - 2; i++)
-				Pull(commitPoints[i], commitPoints[i + 1]);
-		}
-
-		public void Pull(DateTime since, DateTime until)
-		{
 			CheckAnyFileIsNotCheckedOut();
 			CheckAllSymbolicLinksAreMounted();
-
 			CheckModifiedFileIsNotExist();
 
-			ClearCase.SetDefaultCS();
-			new Git(IOHandler.RepoPath).Checkout("master");
-			new Git(IOHandler.RepoPath).Execute("status >" + IOHandler.GitoutPath);
-			// copy vob >> repo
-			// master commit
+			List<string> branchFileList = ClearCase.FindAllFilesInBranch(IOHandler.VobPath, IOHandler.BranchName);
+			branchFileList.ForEach(file => ccHistory.AddRange(ClearCase.Lshistory(file)));
 
-			ClearCase.SetBranchCS(IOHandler.BranchName);
-			new Git(IOHandler.RepoPath).Checkout(IOHandler.BranchName);
-			new Git(IOHandler.RepoPath).Execute("status >" + IOHandler.GitoutPath);
-			// copy vob >> repo
-			// user_branch commit
+			List<DateTime> commitPoints = GetCommitPoints(ccHistory);
+			for (int i = 0; i < commitPoints.Count - 2; i++)
+				Pull(ccHistory, commitPoints[i], commitPoints[i + 1]);
+		}
+
+		private void Pull(List<CCElementVersion> ccHistory, DateTime since, DateTime until)
+		{
+			Git git = new Git(IOHandler.RepoPath);
+			string author = "gicc <gicc@test.test>"; // todo : implement
+
+			// main -> master
+			ClearCase.SetBranchCS("master", until);
+			List<string> mainFileList = ClearCase.FindAllFilesInBranch(IOHandler.VobPath, "main", since, until);
+			
+			foreach (string relativeFilePath in mainFileList)
+			{
+				if (!git.IsIgnored(relativeFilePath))
+					IOHandler.Copy(System.IO.Path.Combine(IOHandler.VobPath,relativeFilePath), 
+						System.IO.Path.Combine(IOHandler.RepoPath, relativeFilePath));
+			}
+			
+			git.Checkout("master");
+			git.AddCommit("gicc", author);
+
+			// vob branch -> git branch
+			ClearCase.SetBranchCS(IOHandler.BranchName, until);
+
+			List<string> branchFileList = ccHistory
+				.Where(elemVer => elemVer.CreatedDate > since && elemVer.CreatedDate <= until)
+				.Select(elemVer => elemVer.AbsoluteFilePath).ToList()
+				.Distinct().ToList();
+
+			foreach (string absFilePath in branchFileList)
+			{
+				string relativeFilePath = IOHandler.EliminateVobPath(absFilePath);
+				if (!git.IsIgnored(relativeFilePath))
+					IOHandler.Copy(absFilePath, System.IO.Path.Combine(IOHandler.RepoPath, relativeFilePath));
+			}
+
+			git.Checkout(IOHandler.BranchName);
+			git.AddCommit("gicc", author);
 		}
 
 		internal List<DateTime> GetCommitPoints(List<CCElementVersion> ccHistory)

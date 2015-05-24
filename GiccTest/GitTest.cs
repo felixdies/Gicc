@@ -128,5 +128,22 @@ namespace Gicc.Test
 			//Environment.CurrentDirectory = Directory.GetDirectoryRoot(REPO_PATH);
 			//FileEx.DeleteIfExists(Path.Combine(REPO_PATH));
 		}
+
+		[TestCase(@".builds", true)]
+		[TestCase(@"0.suo", true)]
+		[TestCase(@"0.sln.docstates", true)]
+		[TestCase(@"0.ide\0", true)]
+		[TestCase(@"0.sln.ide\0", true)]
+		[TestCase(@"debug\0", true)]
+		[TestCase(@"Debug\0", true)]
+		[TestCase(@"x86\0", true)]
+		[TestCase(@"testresult\0", true)]
+		[TestCase(@"testresult1\0", true)]
+		[TestCase(@"testResult\0", true)]
+		[TestCase(@"Testresult1\0", true)]
+		public void IsGitIgnoredTest(string path, bool result)
+		{
+			Assert.AreEqual(new Git(REPO_PATH).IsIgnored(path), result);
+		}
 	}
 }

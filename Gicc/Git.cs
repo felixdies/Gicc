@@ -39,6 +39,12 @@ namespace Gicc
 			Execute("add --all .");
 			Commit(message, author, date);
 		}
+		
+		internal void AddCommit(string message, string author)
+		{
+			Execute("add --all .");
+			Commit(message, author);
+		}
 
 		internal void Commit(string message, string author, string date)
 		{
@@ -66,6 +72,12 @@ namespace Gicc
 		{
 			Execute("branch >" + IOHandler.GitoutPath);
 			return IOHandler.ReadGitout();
+		}
+
+		internal bool IsIgnored(string fileName)
+		{
+			Execute("check-ignore " + fileName + " >" + IOHandler.GitoutPath);
+			return IOHandler.ReadGitout().Count > 0;
 		}
 
 		internal void Checkout(string branch)

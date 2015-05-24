@@ -78,5 +78,26 @@ namespace Gicc.Test
 		{
 			Assert.AreEqual(REPO_PATH, IOHandler.RepoPath);
 		}
+
+		[Test]
+		public void CopyTest()
+		{
+			string src = Path.Combine(REPO_PATH, "copytest");
+			string dest = Path.Combine(REPO_PATH, "copytestdir\\copytest_dest");
+			
+			File.Create(src).Close();
+			Directory.CreateDirectory(Path.GetDirectoryName(dest));
+			IOHandler.Copy(src, dest);
+
+			try
+			{
+				Assert.IsTrue(File.Exists(dest));
+			}
+			finally
+			{
+				FileEx.DeleteIfExists(src);
+				FileEx.DeleteIfExists(Path.Combine(REPO_PATH, "copytestdir"));
+			}
+		}
 	}
 }

@@ -12,15 +12,9 @@ namespace Gicc.Test
   [TestFixture]
   public class GiccTest : GiccTestBase
   {
-    [Test]
-    public void WriteConfigTest()
-    {
-    }
-
 		[Test]
 		public void PullTest()
 		{
-			// foreach FindAllFilesInBranch() - Add LsHistory()
 		}
 
 		[Test]

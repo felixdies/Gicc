@@ -95,6 +95,20 @@ namespace Gicc
 			SetCS(branchCS);
 		}
 
+		internal static void SetBranchCS(string branchName, DateTime time)
+		{
+			List<string> branchCS = new List<string>(new string[] {
+				"time " + time.ToString()
+				, "element * CHECKEDOUT"
+				, "element -dir * /main/LATEST"
+				, "element -file * /main/" + branchName + "/LATEST"
+				, "element -file * /main/LATEST -mkbranch " + branchName
+				, "end time"
+			});
+
+			SetCS(branchCS);
+		}
+
 		internal static void SetDefaultCS()
 		{
 			Execute("setcs -default");
@@ -110,6 +124,20 @@ namespace Gicc
 			Execute("find " + pname + args + " -print > " + IOHandler.CCoutPath);
       
       return IOHandler.ReadCCout();
+		}
+
+		public static List<string> FindAllFilesInBranch(string pname, string branchName, DateTime since, DateTime until)
+		{
+			string args = string.Empty;
+
+			if (!string.IsNullOrWhiteSpace(branchName))
+				args += " -branch 'brtype(" + branchName + ")'";
+
+			args += " -version '{created_since(" + since.AddSeconds(1).ToString() + ") && !created_since(" + until.AddSeconds(1).ToString() + ")}'";
+
+			Execute("find " + pname + args + " -print > " + IOHandler.CCoutPath);
+
+			return IOHandler.ReadCCout();
 		}
 
     public static void ViewVersionTree(string pname)
@@ -152,7 +180,7 @@ namespace Gicc
 		{
 			List<CCElementVersion> resultList = new List<CCElementVersion>();
 
-			Execute("lshistory -fmt " + Fmt + " -since" + since.ToString() + " " + pname + " > " + IOHandler.CCoutPath);
+			Execute("lshistory -fmt " + Fmt + " -since" + since.AddSeconds(1).ToString() + " " + pname + " > " + IOHandler.CCoutPath);
 			foreach (string info in IOHandler.ReadCCout())
 			{
 				resultList.Add(new CCElementVersion(info));
@@ -261,6 +289,22 @@ namespace Gicc
 			{
 				string[] elemArr = Version.Split(new char[] { '\\', '/' });
 				return elemArr[elemArr.Length - 2];
+			}
+		}
+
+		public string RelativeFilePath
+		{
+			get
+			{
+				return IOHandler.EliminateVobPath(ElementName);
+			}
+		}
+
+		public string AbsoluteFilePath
+		{
+			get
+			{
+				return Path.Combine(IOHandler.VobPath, RelativeFilePath);
 			}
 		}
 
