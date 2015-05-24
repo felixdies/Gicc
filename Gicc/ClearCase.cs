@@ -148,6 +148,19 @@ namespace Gicc
 			return resultList;
 		}
 
+		internal static List<CCElementVersion> Lshistory(string pname, DateTime since)
+		{
+			List<CCElementVersion> resultList = new List<CCElementVersion>();
+
+			Execute("lshistory -fmt " + Fmt + " -since" + since.ToString() + " " + pname + " > " + IOHandler.CCoutPath);
+			foreach (string info in IOHandler.ReadCCout())
+			{
+				resultList.Add(new CCElementVersion(info));
+			}
+
+			return resultList;
+		}
+
 		internal static CCElementVersion Describe(string pname)
 		{
 			Execute("describe -fmt " + Fmt + " " + pname + " > " + IOHandler.CCoutPath); 
@@ -241,6 +254,15 @@ namespace Gicc
 		public string OwnerLoginName { get; set; }
 		public string OwnerFullName { get; set; }
 		public string HyperLinkInfo { get; set; }
+		
+		public string Branch
+		{
+			get
+			{
+				string[] elemArr = Version.Split(new char[] { '\\', '/' });
+				return elemArr[elemArr.Length - 2];
+			}
+		}
 
 		public CCElementVersion Predecessor { get; set; }
 		public CCElementVersion HyperLinkedFrom { get; set; }

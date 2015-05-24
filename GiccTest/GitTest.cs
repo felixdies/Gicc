@@ -21,7 +21,12 @@ namespace Gicc.Test
 		protected string BRANCH_NAME = ConfigurationManager.AppSettings["BranchName"];
 		protected string REPO_PATH = ConfigurationManager.AppSettings["RepoPath"];
 
-		public void CreateMockUp()
+		public GitTest()
+		{
+			CreateGitTestMockUp();
+		}
+
+		public void CreateGitTestMockUp()
 		{
 			string MOCKUP_PATH = Path.Combine(Directory.GetParent(REPO_PATH).ToString(), "gicctest_mockup");
 			
@@ -89,11 +94,6 @@ namespace Gicc.Test
 			Environment.CurrentDirectory = cachedCWD;
 		}
 
-		public GitTest()
-		{
-			CreateMockUp();
-		}
-		
 		[Test]
 		public void HelpTest()
 		{

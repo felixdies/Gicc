@@ -18,9 +18,19 @@ namespace Gicc
 			IOHandler.WriteConfig(config);
 		}
 
+		public void Pull()
+		{
+			List<CCElementVersion> ccHistory = null;  // foreach FindAllFilesInBranch() - Add LsHistory()
+
+			List<DateTime> commitPoints = GetCommitPoints(ccHistory);
+
+			for (int i = 0; i < commitPoints.Count - 2; i++)
+				Pull(commitPoints[i], commitPoints[i + 1]);
+		}
+
 		public void Pull(DateTime since, DateTime until)
 		{
-			CheckCheckedOutFileIsNotExist();
+			CheckAnyFileIsNotCheckedOut();
 			CheckAllSymbolicLinksAreMounted();
 
 			CheckModifiedFileIsNotExist();
@@ -38,7 +48,34 @@ namespace Gicc
 			// user_branch commit
 		}
 
-		internal void CheckCheckedOutFileIsNotExist()
+		internal List<DateTime> GetCommitPoints(List<CCElementVersion> ccHistory)
+		{
+			List<DateTime> resultCommitPoints = new List<DateTime>();
+			List<CCElementVersion> orderedHistory = ccHistory.OrderBy(x => x.CreatedDate).ToList();
+
+			for (int i = 0; i < orderedHistory.Count; i++)
+			{
+				if (i == orderedHistory.Count - 1)
+				{
+					resultCommitPoints.Add(orderedHistory[i].CreatedDate);
+					break;
+				}
+
+				if (orderedHistory[i].Branch == orderedHistory[i + 1].Branch
+					&& orderedHistory[i].OwnerFullName == orderedHistory[i + 1].OwnerFullName)
+				{
+					continue;
+				}
+				else
+				{
+					resultCommitPoints.Add(orderedHistory[i].CreatedDate);
+				}
+			}
+
+			return resultCommitPoints;
+		}
+
+		internal void CheckAnyFileIsNotCheckedOut()
 		{
 			List<string> checkedoutFileList = ClearCase.LscheckoutInCurrentViewByLoginUser();
 			if (checkedoutFileList.Count > 0)

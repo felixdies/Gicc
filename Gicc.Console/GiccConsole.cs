@@ -61,7 +61,7 @@ namespace Gicc.Console
     {
 			try
 			{
-				new Gicc().Pull(DateTime.Now, DateTime.Now);
+				new Gicc().Pull();
 			}
 			catch (GiccException exception)
 			{

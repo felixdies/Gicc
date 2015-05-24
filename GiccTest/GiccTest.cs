@@ -17,29 +17,249 @@ namespace Gicc.Test
     {
     }
 
+		[Test]
+		public void PullTest()
+		{
+			// foreach FindAllFilesInBranch() - Add LsHistory()
+		}
+
+		[Test]
+		public void GetCommitPointsTest()
+		{
+			DateTime commitPoint = new DateTime(2015, 4, 1, 1, 0, 0);
+
+			List<DateTime> expected = new List<DateTime>();
+			List<DateTime> actual = new Gicc().GetCommitPoints(CCHistoryList);
+
+			expected.Add(commitPoint.AddMinutes(0));
+			expected.Add(commitPoint.AddMinutes(2));
+			expected.Add(commitPoint.AddMinutes(4));
+			expected.Add(commitPoint.AddMinutes(5));
+			expected.Add(commitPoint.AddMinutes(8));
+			expected.Add(commitPoint.AddMinutes(9));
+			expected.Add(commitPoint.AddMinutes(11));
+
+			Assert.AreEqual(expected, actual);
+		}
+
+		private List<CCElementVersion> CCHistoryList
+		{
+			get
+			{
+				List<CCElementVersion> ccHistoryList = new List<CCElementVersion>();
+				DateTime checkinTime = new DateTime(2015, 4, 1, 1, 0, 0);
+
+				// FindAllFilesInBranch() 함수를 먼저 호출하므로 history 는 file 단위로 나타남.
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime,
+					ElementName = "tt.txt",
+					Version = @"\main\0",
+					Operation = "mkelem",
+					OwnerFullName = "Init"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime,
+					ElementName = "tt.txt",
+					Version = @"\main\1",
+					Operation = "mkelem",
+					OwnerFullName = "Init"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(1),
+					ElementName = "tt.txt",
+					Version = @"\main\" + BRANCH_NAME + @"\0",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(1),
+					ElementName = "tt.txt",
+					Version = @"\main\" + BRANCH_NAME + @"\1",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(3),
+					ElementName = "tt.txt",
+					Version = @"\main\2",
+					Operation = "chekin",
+					OwnerFullName = "B"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(6),
+					ElementName = "tt.txt",
+					Version = @"\main\" + BRANCH_NAME + @"\2",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(8),
+					ElementName = "tt.txt",
+					Version = @"\main\" + BRANCH_NAME + @"\3",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(10),
+					ElementName = "tt.txt",
+					Version = @"\main\3",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				/*
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(12),
+					ElementName = "tt.txt",
+					Version = @"\main\3",
+					Operation = "rmelem",
+					OwnerFullName = "A"
+				}
+				);
+				*/
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime,
+					ElementName = @"sub\subtt.txt",
+					Version = @"\main\0",
+					Operation = "mkelem",
+					OwnerFullName = "Init"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime,
+					ElementName = @"sub\subtt.txt",
+					Version = @"\main\1",
+					Operation = "mkelem",
+					OwnerFullName = "Init"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(2),
+					ElementName = @"sub\subtt.txt",
+					Version = @"\main\" + BRANCH_NAME + @"\0",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(2),
+					ElementName = @"sub\subtt.txt",
+					Version = @"\main\" + BRANCH_NAME + @"\1",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(4),
+					ElementName = @"sub\subtt.txt",
+					Version = @"\main\2",
+					Operation = "chekin",
+					OwnerFullName = "B"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(5),
+					ElementName = @"sub\subtt.txt",
+					Version = @"\main\3",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(7),
+					ElementName = @"sub\subtt.txt",
+					Version = @"\main\" + BRANCH_NAME + @"\2",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(9),
+					ElementName = @"sub\subtt.txt",
+					Version = @"\main\" + BRANCH_NAME + @"\3",
+					Operation = "chekin",
+					OwnerFullName = "B"
+				}
+				);
+
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(11),
+					ElementName = @"sub\subtt.txt",
+					Version = @"\main\4",
+					Operation = "chekin",
+					OwnerFullName = "A"
+				}
+				);
+
+				/*
+				ccHistoryList.Add(new CCElementVersion()
+				{
+					CreatedDate = checkinTime.AddMinutes(13),
+					ElementName = "tt.txt",
+					Version = @"\main\4",
+					Operation = "rmelem",
+					OwnerFullName = "B"
+				}
+				);
+				*/
+
+				return ccHistoryList;
+			}
+		}
+
     [Test]
-    public void PullTest()
-    {
-      Gicc gicc = new Gicc();
-
-      DateTime since = DateTime.Parse("2015-05-04 15:41:34");   // 마지막 push 시점으로 가정.
-      DateTime until = DateTime.Now;
-
-      gicc.Pull(since, until);
-    }
-
-    [Test]
-    public void CheckCheckedOutFileIsNotExistTest()
+    public void CheckAnyFileIsNotCheckedOutTest()
     {
       string checkoutFile = "main.txt";
 
-      new Gicc().CheckCheckedOutFileIsNotExist();
+      new Gicc().CheckAnyFileIsNotCheckedOut();
 
       ClearCase.Checkout(checkoutFile);
 
       try
       {
-        new Gicc().CheckCheckedOutFileIsNotExist();
+        new Gicc().CheckAnyFileIsNotCheckedOut();
       }
       catch (GiccException ex)
       {
