@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Include="AssertEx.cs" />
     <Compile Include="ClearCaseTest.cs" />
-    <Compile Include="CloneTest.cs" />
     <Compile Include="FileEx.cs" />
     <Compile Include="GitTest.cs" />
     <Compile Include="IOHandlerTest.cs" />
