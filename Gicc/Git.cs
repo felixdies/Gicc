@@ -18,6 +18,11 @@ namespace Gicc
 
 		public string RepositoryPath { get; set; }
 
+		public string LogPath
+		{
+			get { return Path.Combine(RepositoryPath, @".git/gicc/log"); }
+		}
+
 		string Command
 		{
 			get { return "git "; }
@@ -27,6 +32,22 @@ namespace Gicc
 		{
 			Execute("help >" + IOHandler.GitoutPath);
 			return IOHandler.ReadGitout()[0];
+		}
+
+		internal void AddCommit(string message, string author, string date)
+		{
+			Execute("add --all .");
+			Commit(message, author, date);
+		}
+
+		internal void Commit(string message, string author, string date)
+		{
+			Execute("commit --author='" + author + "' --date='" + date + "' -am '" + message + "'");
+		}
+
+		internal void Commit(string message, string author)
+		{
+			Commit(message, author, DateTime.Now.ToString());
 		}
 
 		internal List<string> GetUntrackedFileList()
@@ -50,14 +71,17 @@ namespace Gicc
 		internal void Checkout(string branch)
 		{
 			List<string> allBranches = GetAllBranches();
-			if(allBranches.Contains(branch) || allBranches.Contains("* " + branch))
+			bool alreadyExists = allBranches.Any(existBranch => existBranch.Contains(branch));
+
+			if (!alreadyExists)
 				Execute("checkout -b " + branch);
+
 			Execute("checkout " + branch);
 		}
 
 		internal void Execute(string arg, bool wait = true)
 		{
-			Process gicProcess = new Process();
+			Process gitProcess = new Process();
 
 			ProcessStartInfo proInfo = new ProcessStartInfo()
 			{
@@ -69,17 +93,17 @@ namespace Gicc
 				RedirectStandardError = true
 			};
 
-			gicProcess.StartInfo = proInfo;
-			gicProcess.Start();
-			IOHandler.WriteLog(">>> " + DateTime.Now.ToString("yy-MM-dd HH:mm:ss") + " " + proInfo.Arguments + Environment.NewLine);
+			gitProcess.StartInfo = proInfo;
+			gitProcess.Start();
+			File.AppendAllText(LogPath, ">>> " + DateTime.Now.ToString("yy-MM-dd HH:mm:ss") + " " + proInfo.Arguments + Environment.NewLine);
 
 			if (wait)
 			{
-				using (StreamReader errReader = gicProcess.StandardError)
+				using (StreamReader errReader = gitProcess.StandardError)
 				{
 					string err = errReader.ReadToEnd(); // wait for exit
 					if (!string.IsNullOrWhiteSpace(err))
-						IOHandler.WriteLog(err);
+						File.AppendAllText(LogPath, err);
 				}
 			}
 		}

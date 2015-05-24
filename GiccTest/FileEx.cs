@@ -13,7 +13,20 @@ namespace Gicc.Test
 		internal static void DeleteIfExists(string path)
 		{
 			if (File.Exists(path))
+			{
+				File.SetAttributes(path, FileAttributes.Normal);
 				File.Delete(path);
+			}
+			else if (Directory.Exists(path))
+			{
+				foreach (string file in Directory.GetFiles(path))
+					DeleteIfExists(file);
+
+				foreach (string dir in Directory.GetDirectories(path))
+					DeleteIfExists(dir);
+
+				Directory.Delete(path, false);
+			}
 		}
 
 		internal static void MoveIfExists(string srcPath, string destPath)
