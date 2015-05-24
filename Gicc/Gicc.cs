@@ -4,57 +4,117 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.IO;
+
 namespace Gicc
 {
 	public class Gicc
 	{
-		public static void SetConfig(string vobPath, string branchName, string repoPath)
+		string CWD { get; set; }
+		string GiccPath
 		{
-			List<string> config = new List<string>(new string[]{
-				@"vob = " + vobPath
-				, @"branch = " + branchName
-				, @"repository = " + repoPath}
-				);
-			IOHandler.WriteConfig(config);
+			get
+			{
+				return Path.Combine(CWD, @".git\gicc");
+			}
+		}
+		string ConfigPath
+		{
+			get
+			{
+				return Path.Combine(GiccPath, "config");
+			}
+		}
+		string CCoutPath
+		{
+			get { return Path.Combine(GiccPath, "ccout"); }
+		}
+		string GitoutPath
+		{
+			get { return Path.Combine(GiccPath, "gitout"); }
+		}
+		string VobPath { get; set; }
+		string BranchName { get; set; }
+		string RepoPath { get; set; }
+
+		public Gicc()
+		{
+			CWD = Environment.CurrentDirectory;
+			ParseAllConfigs();
+		}
+
+		public Gicc(string cwd)
+		{
+			this.CWD = cwd;
+			ParseAllConfigs();
+		}
+
+		public void WriteConfig(string vobPath, string branchName, string repoPath)
+		{
+			string[] config = new string[]{
+				"vob = " + vobPath
+				, "branch = " + branchName
+				, "repository = " + repoPath};
+
+			File.WriteAllLines(ConfigPath, config);
+		}
+		
+		void ParseAllConfigs()
+		{
+			if(!File.Exists(ConfigPath))
+				return;
+
+			VobPath = ParseConfig("vob");
+			BranchName = ParseConfig("branch");
+			RepoPath = ParseConfig("repository");
+		}
+
+		string ParseConfig(string configName)
+		{
+			return File.ReadAllLines(ConfigPath).ToList().Find(config => config.ToLower().StartsWith(configName)).Split('=').Last().Trim();
 		}
 
 		public void Pull()
 		{
 			List<CCElementVersion> ccHistory = null;
+			ClearCase cc = new ClearCase(VobPath, BranchName);
 
-			CheckAnyFileIsNotCheckedOut();
-			CheckAllSymbolicLinksAreMounted();
-			CheckModifiedFileIsNotExist();
+			cc.CheckCheckedoutFileIsNotExist();
+			cc.CheckAllSymbolicLinksAreMounted();
+			cc.CheckModifiedFileIsNotExist();
 
-			List<string> branchFileList = ClearCase.FindAllFilesInBranch(IOHandler.VobPath, IOHandler.BranchName);
-			branchFileList.ForEach(file => ccHistory.AddRange(ClearCase.Lshistory(file)));
+			List<string> branchFileList = cc.FindAllFilesInBranch();
+			branchFileList.ForEach(file => ccHistory.AddRange(new ClearCase(VobPath).Lshistory(file)));
 
 			List<DateTime> commitPoints = GetCommitPoints(ccHistory);
 			for (int i = 0; i < commitPoints.Count - 2; i++)
-				Pull(ccHistory, commitPoints[i], commitPoints[i + 1]);
+				CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]);
 		}
 
-		private void Pull(List<CCElementVersion> ccHistory, DateTime since, DateTime until)
+		internal void CopyAndCommit(List<CCElementVersion> ccHistory, DateTime since, DateTime until)
 		{
 			Git git = new Git(IOHandler.RepoPath);
 			string author = "gicc <gicc@test.test>"; // todo : implement
 
 			// main -> master
-			ClearCase.SetBranchCS("master", until);
-			List<string> mainFileList = ClearCase.FindAllFilesInBranch(IOHandler.VobPath, "main", since, until);
+			ClearCase mainCC = new ClearCase(VobPath, "main");
+			mainCC.SetBranchCS(until);
+			git.Checkout("master");
 			
+			List<string> mainFileList = mainCC.FindAllFilesInBranch(since, until);
 			foreach (string relativeFilePath in mainFileList)
 			{
 				if (!git.IsIgnored(relativeFilePath))
 					IOHandler.Copy(System.IO.Path.Combine(IOHandler.VobPath,relativeFilePath), 
 						System.IO.Path.Combine(IOHandler.RepoPath, relativeFilePath));
 			}
-			
-			git.Checkout("master");
 			git.AddCommit("gicc", author);
+			git.TagPull();
 
 			// vob branch -> git branch
-			ClearCase.SetBranchCS(IOHandler.BranchName, until);
+			ClearCase branchCC = new ClearCase(VobPath, BranchName);
+			branchCC.SetBranchCS(until);
+			git.Checkout(IOHandler.BranchName);
 
 			List<string> branchFileList = ccHistory
 				.Where(elemVer => elemVer.CreatedDate > since && elemVer.CreatedDate <= until)
@@ -68,8 +128,8 @@ namespace Gicc
 					IOHandler.Copy(absFilePath, System.IO.Path.Combine(IOHandler.RepoPath, relativeFilePath));
 			}
 
-			git.Checkout(IOHandler.BranchName);
 			git.AddCommit("gicc", author);
+			git.TagPull();
 		}
 
 		internal List<DateTime> GetCommitPoints(List<CCElementVersion> ccHistory)
@@ -97,48 +157,6 @@ namespace Gicc
 			}
 
 			return resultCommitPoints;
-		}
-
-		internal void CheckAnyFileIsNotCheckedOut()
-		{
-			List<string> checkedoutFileList = ClearCase.LscheckoutInCurrentViewByLoginUser();
-			if (checkedoutFileList.Count > 0)
-			{
-				string message =
-					"체크아웃 된 파일이 있습니다." + Environment.NewLine
-					+ string.Join(Environment.NewLine, checkedoutFileList);
-				throw new GiccException(message);
-			}
-		}
-
-		internal void CheckAllSymbolicLinksAreMounted()
-		{
-			List<CCElementVersion> slinkList = ClearCase.FindAllSymbolicLinks();
-
-			foreach (CCElementVersion link in slinkList)
-			{
-				if (!System.IO.Directory.Exists(link.SymbolicLink))
-					throw new GiccException(link.SymbolicLink + "  VOB 이 mount 되지 않았습니다.");
-			}
-		}
-
-		internal void CheckModifiedFileIsNotExist()
-		{
-			List<string> untrackedFileList = new Git(IOHandler.RepoPath).GetUntrackedFileList();
-			if (untrackedFileList.Count > 0)
-			{
-				string message = "새로 추가된 후 commit 되지 않은 파일이 있습니다." + Environment.NewLine;
-				message += string.Join(Environment.NewLine, untrackedFileList);
-				throw new GiccException(message);
-			}
-
-			List<string> modifiedFileList = new Git(IOHandler.RepoPath).GetModifiedFileList();
-			if (modifiedFileList.Count > 0)
-			{
-				string message = "변경된 후 commit 되지 않은 파일이 있습니다." + Environment.NewLine;
-				message += string.Join(Environment.NewLine, modifiedFileList);
-				throw new GiccException(message);
-			}
 		}
 	}
 }

@@ -9,29 +9,86 @@ using System.Diagnostics;
 
 namespace Gicc
 {
-  public class Git
+  public class Git : Executor
   {
-		public Git(string repositoryPath)
+		public Git(string executingPath, string giccPath)
+			: base(executingPath, giccPath + @"\gitout", giccPath + @"\log") { }
+
+		public Git(string executingPath, string giccPath, string branchName)
+			: base(executingPath, giccPath + @"\gitout", giccPath + @"\log")
 		{
-			this.RepositoryPath = repositoryPath;
+			this.BranchName = branchName;
 		}
 
-		public string RepositoryPath { get; set; }
-
-		public string LogPath
+		public Git(string executingPath, string outPath, string logPath, string branchName)
+			: base(executingPath, outPath, logPath)
 		{
-			get { return Path.Combine(RepositoryPath, @".git/gicc/log"); }
+			this.BranchName = branchName;
 		}
 
-		string Command
+		internal string RepositoryPath
 		{
-			get { return "git "; }
+			get { return GetExecutedResult("rev-parse --show-toplevel"); }
+		}
+
+		internal string CurrentBranch
+		{
+			get { return GetExecutedResult("rev-parse --abbrev-ref HEAD"); }
+		}
+
+		internal List<string> UntrackedFileList
+		{
+			get { return GetExecutedResultList("ls-files --others"); }
+		}
+
+		internal List<string> ModifiedFileList
+		{
+			get { return GetExecutedResultList("diff --name-only"); }
+		}
+
+		internal List<string> BranchList
+		{
+			get { return GetExecutedResultList("branch"); }
+		}
+
+		internal DateTime LastGiccPull
+		{
+			get
+			{
+				string lastPulledCommit = GetExecutedResult("show-ref --tags gicc_pull");
+				string lastGiccPullTime = GetExecutedResult("git show -s --format=%ci " + lastPulledCommit.Substring(0, 10));
+				return DateTime.Parse(lastGiccPullTime);
+			}
+		}
+
+		internal void CheckModifiedFileIsNotExist()
+		{
+			List<string> untrackedFileList = UntrackedFileList;
+			if (untrackedFileList.Count > 0)
+			{
+				string message = "새로 추가된 후 commit 되지 않은 파일이 있습니다." + Environment.NewLine;
+				message += string.Join(Environment.NewLine, untrackedFileList);
+				throw new GiccException(message);
+			}
+
+			List<string> modifiedFileList = ModifiedFileList;
+			if (modifiedFileList.Count > 0)
+			{
+				string message = "변경된 후 commit 되지 않은 파일이 있습니다." + Environment.NewLine;
+				message += string.Join(Environment.NewLine, modifiedFileList);
+				throw new GiccException(message);
+			}
 		}
 
 		internal string Help()
 		{
-			Execute("help >" + IOHandler.GitoutPath);
-			return IOHandler.ReadGitout()[0];
+			return GetExecutedResult("help");
+		}
+
+		internal void AddCommit(string message, string author)
+		{
+			Execute("add --all .");
+			Commit(message, author);
 		}
 
 		internal void AddCommit(string message, string author, string date)
@@ -39,11 +96,10 @@ namespace Gicc
 			Execute("add --all .");
 			Commit(message, author, date);
 		}
-		
-		internal void AddCommit(string message, string author)
+
+		internal void Commit(string message, string author)
 		{
-			Execute("add --all .");
-			Commit(message, author);
+			Commit(message, author, DateTime.Now.ToString());
 		}
 
 		internal void Commit(string message, string author, string date)
@@ -51,73 +107,33 @@ namespace Gicc
 			Execute("commit --author='" + author + "' --date='" + date + "' -am '" + message + "'");
 		}
 
-		internal void Commit(string message, string author)
+		internal void TagPull()
 		{
-			Commit(message, author, DateTime.Now.ToString());
-		}
-
-		internal List<string> GetUntrackedFileList()
-		{
-			Execute("ls-files --others >" + IOHandler.GitoutPath);
-			return IOHandler.ReadGitout();
-		}
-
-		internal List<string> GetModifiedFileList()
-		{
-			Execute("diff --name-only >" + IOHandler.GitoutPath);
-			return IOHandler.ReadGitout();
-		}
-
-		internal List<string> GetAllBranches()
-		{
-			Execute("branch >" + IOHandler.GitoutPath);
-			return IOHandler.ReadGitout();
+			Execute("tag -f gicc_pull");
 		}
 
 		internal bool IsIgnored(string fileName)
 		{
-			Execute("check-ignore " + fileName + " >" + IOHandler.GitoutPath);
-			return IOHandler.ReadGitout().Count > 0;
+			return GetExecutedResultList("check-ignore " + fileName).Count > 0;
 		}
 
 		internal void Checkout(string branch)
 		{
-			List<string> allBranches = GetAllBranches();
-			bool alreadyExists = allBranches.Any(existBranch => existBranch.Contains(branch));
-
-			if (!alreadyExists)
+			if (!BranchList.Any(existBranch => existBranch.Contains(branch)))
 				Execute("checkout -b " + branch);
 
 			Execute("checkout " + branch);
 		}
 
-		internal void Execute(string arg, bool wait = true)
+		protected override string Command
 		{
-			Process gitProcess = new Process();
+			get { return "git"; }
+		}
 
-			ProcessStartInfo proInfo = new ProcessStartInfo()
-			{
-				WorkingDirectory = RepositoryPath,
-				FileName = @"powershell",
-				Arguments = Command + arg,
-				CreateNoWindow = true,
-				UseShellExecute = false,
-				RedirectStandardError = true
-			};
-
-			gitProcess.StartInfo = proInfo;
-			gitProcess.Start();
-			File.AppendAllText(LogPath, ">>> " + DateTime.Now.ToString("yy-MM-dd HH:mm:ss") + " " + proInfo.Arguments + Environment.NewLine);
-
-			if (wait)
-			{
-				using (StreamReader errReader = gitProcess.StandardError)
-				{
-					string err = errReader.ReadToEnd(); // wait for exit
-					if (!string.IsNullOrWhiteSpace(err))
-						File.AppendAllText(LogPath, err);
-				}
-			}
+		protected override void ValidateBeforeExecution()
+		{
+			if (!File.Exists(OutPath))
+				throw new GiccException("출력 경로를 찾을 수 없습니다. 현재 위치가 Local 저장소의 최상위 폴더가 맞는 지 확인 해 주세요.");
 		}
   }
 }

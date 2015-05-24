@@ -15,8 +15,12 @@ namespace Gicc.Test
   public class GiccTest : GiccTestBase
   {
 		[Test]
-		public void PullTest()
+		public void CopyAndCommitTest()
 		{
+			Git git = new Git(REPO_PATH);
+
+			CreateGitTestMockUp();
+			new Gicc().CopyAndCommit(CCHistoryList, git.LastGiccPull, DateTime.Now);
 			throw new NotImplementedException();
 		}
 
@@ -318,13 +322,13 @@ namespace Gicc.Test
     {
       string checkoutFile = "main.txt";
 
-      new Gicc().CheckAnyFileIsNotCheckedOut();
+      new Gicc().CheckCheckedoutFileIsNotExist();
 
       ClearCase.Checkout(checkoutFile);
 
       try
       {
-        new Gicc().CheckAnyFileIsNotCheckedOut();
+        new Gicc().CheckCheckedoutFileIsNotExist();
       }
       catch (GiccException ex)
       {
@@ -348,14 +352,14 @@ namespace Gicc.Test
       SetConfig(VOB_PATH, IOHandler.BranchName, IOHandler.RepoPath);
 
       string vobTag = System.Configuration.ConfigurationManager.AppSettings["VobTag"];
+			
+			new ClearCase(Path.GetDirectoryName(VOB_PATH)).Mount(vobTag);
+			new ClearCase(VOB_PATH).CheckAllSymbolicLinksAreMounted();
 
-      ClearCase.Mount(vobTag);
-      new Gicc().CheckAllSymbolicLinksAreMounted();
-
-      ClearCase.UMount(vobTag);
+			new ClearCase(Path.GetDirectoryName(VOB_PATH)).UMount(vobTag);
       try
       {
-        new Gicc().CheckAllSymbolicLinksAreMounted();
+				new ClearCase(VOB_PATH).CheckAllSymbolicLinksAreMounted();
       }
       catch (GiccException ex)
       {

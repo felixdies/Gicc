@@ -25,6 +25,14 @@ namespace Gicc.Test
 		}
 
 		[Test]
+		public void LastGiccPullTest()
+		{
+			string MOCKUP_PATH = Path.Combine(Directory.GetParent(REPO_PATH).ToString(), "gicctest_mockup");
+
+			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 5, 0), new Git(MOCKUP_PATH).LastGiccPull);
+		}
+
+		[Test]
 		public void GetUntrackedFileTest()
 		{
 			List<string> expected = new List<string>(new string[] { "b", "c" });

@@ -5,60 +5,73 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.IO;
-using System.Diagnostics;
 
 namespace Gicc
 {
-	public class ClearCase
+	class ClearCase : Executor
 	{
-		static string Fmt
+		public ClearCase(string executingPath, string giccPath)
+			: base(executingPath, giccPath + @"\ccout", giccPath + @"\log"){}
+
+		public ClearCase(string executingPath, string outPath, string logPath)
+			: base(executingPath, outPath, logPath){}
+
+		public ClearCase(string executingPath, string outPath, string logPath, string branchName)
+			: base(executingPath, outPath, logPath)
+		{
+			this.BranchName = branchName;
+		}
+
+		string Fmt
 		{
 			get
 			{
-				string fmt = "'";
-				fmt += "Attributes=%a";
-				fmt += "|Comment=%Nc";
-				fmt += "|CreatedDate=%d";
-				fmt += "|EventDescription=%e";
-				fmt += "|CheckoutInfo=%Rf";
-				fmt += "|HostName=%h";
-				fmt += "|IndentLevel=%i";
-				fmt += "|Labels=%l";
-				fmt += "|ObjectKind=%m";
-				fmt += "|ElementName=%En";
-				fmt += "|Version=%Vn";
-				fmt += "|PredecessorVersion=%PVn";
-				fmt += "|Operation=%o";
-				fmt += "|Type=%[type]p";
-				fmt += "|SymbolicLink=%[slink_text]p";
-				fmt += "|OwnerLoginName=%[owner]p";
-				fmt += "|OwnerFullName=%[owner]Fp";
-				fmt += "|HyperLink=%[hlink]p";
-				fmt += "\n'";
-				return fmt;
+				return "'"
+				+ "Attributes=%a"
+				+ "|Comment=%Nc"
+				+ "|CreatedDate=%d"
+				+ "|EventDescription=%e"
+				+ "|CheckoutInfo=%Rf"
+				+ "|HostName=%h"
+				+ "|IndentLevel=%i"
+				+ "|Labels=%l"
+				+ "|ObjectKind=%m"
+				+ "|ElementName=%En"
+				+ "|Version=%Vn"
+				+ "|PredecessorVersion=%PVn"
+				+ "|Operation=%o"
+				+ "|Type=%[type]p"
+				+ "|SymbolicLink=%[slink_text]p"
+				+ "|OwnerLoginName=%[owner]p"
+				+ "|OwnerFullName=%[owner]Fp"
+				+ "|HyperLink=%[hlink]p"
+				+ "\n'";
 			}
 		}
 
-		internal static string CurrentView
+		internal string VobPath
+		{
+			get { return string.Empty; }
+		}
+
+		internal string CurrentView
 		{
 			get
 			{
-				Execute("pwv > " + IOHandler.CCoutPath);
-				return IOHandler.ReadCCout()[0].Split(' ')[3];
+				return GetExecutedResult("pwv").Split(' ')[3];
 			}
 		}
 
-		internal static string LogInUser
+		internal string LogInUser
 		{
 			get
 			{
-				Execute("lsview -long " + CurrentView + " > " + IOHandler.CCoutPath);
-				List<string> viewInfo = IOHandler.ReadCCout();
+				List<string> viewInfo = GetExecutedResultList("lsview -long " + CurrentView);
 				return viewInfo.Find(info => info.StartsWith("View owner")).Split(' ')[2];
 			}
 		}
 
-		internal static string LogInUserName
+		internal string LogInUserName
 		{
 			get
 			{
@@ -66,288 +79,179 @@ namespace Gicc
 			}
 		}
 
-		static string Command
+		internal void CheckCheckedoutFileIsNotExist()
 		{
-			get { return "cleartool "; }
+			List<string> checkedoutFileList = LscheckoutInCurrentViewByLoginUser();
+			if (checkedoutFileList.Count > 0)
+			{
+				string message =
+					"체크아웃 된 파일이 있습니다." + Environment.NewLine
+					+ string.Join(Environment.NewLine, checkedoutFileList);
+				throw new GiccException(message);
+			}
 		}
 
-		internal static List<string> CatCS()
+		internal void CheckAllSymbolicLinksAreMounted()
 		{
-			Execute("catcs > " + IOHandler.CCoutPath);
-			return IOHandler.ReadCCout();
+			List<CCElementVersion> slinkList = FindAllSymbolicLinks();
+
+			foreach (CCElementVersion link in slinkList)
+			{
+				if (!System.IO.Directory.Exists(link.SymbolicLink))
+					throw new GiccException(link.SymbolicLink + " VOB 이 mount 되지 않았습니다.");
+			}
 		}
 
-		internal static void SetCS(List<string> configSpec)
+		internal List<string> CatCS()
 		{
-			IOHandler.WriteCache(configSpec);
-			Execute("setcs " + IOHandler.CachePath);
+			return GetExecutedResultList("catcs");
 		}
 
-		internal static void SetBranchCS(string branchName)
+		internal void SetCS(string[] configSpec)
 		{
-			List<string> branchCS = new List<string>(new string[] {
+			File.WriteAllLines(OutPath, configSpec);
+			Execute("setcs " + OutPath);
+		}
+
+		internal void SetBranchCS()
+		{
+			string[] branchCS = new string[]{
 				"element * CHECKEDOUT"
 				, "element -dir * /main/LATEST"
-				, "element -file * /main/" + branchName + "/LATEST"
-				, "element -file * /main/LATEST -mkbranch " + branchName
-			});
+				, "element -file * /main/" + BranchName + "/LATEST"
+				, "element -file * /main/LATEST -mkbranch " + BranchName
+			};
 
 			SetCS(branchCS);
 		}
 
-		internal static void SetBranchCS(string branchName, DateTime time)
+		internal void SetBranchCS(DateTime time)
 		{
-			List<string> branchCS = new List<string>(new string[] {
+			string[] branchCS = new string[] {
 				"time " + time.ToString()
 				, "element * CHECKEDOUT"
 				, "element -dir * /main/LATEST"
-				, "element -file * /main/" + branchName + "/LATEST"
-				, "element -file * /main/LATEST -mkbranch " + branchName
+				, "element -file * /main/" + BranchName + "/LATEST"
+				, "element -file * /main/LATEST -mkbranch " + BranchName
 				, "end time"
-			});
+			};
 
 			SetCS(branchCS);
 		}
 
-		internal static void SetDefaultCS()
+		internal void SetDefaultCS()
 		{
 			Execute("setcs -default");
 		}
 
-		public static List<string> FindAllFilesInBranch(string pname, string branchName)
+		public List<string> FindAllFilesInBranch()
 		{
       string args = string.Empty;
 			
-			if (!string.IsNullOrWhiteSpace(branchName))
-				args += " -branch 'brtype(" + branchName + ")'";
+			if (!string.IsNullOrWhiteSpace(BranchName))
+				args += " -branch 'brtype(" + BranchName + ")'";
 
-			Execute("find " + pname + args + " -print > " + IOHandler.CCoutPath);
-      
-      return IOHandler.ReadCCout();
+			return GetExecutedResultList("find . " + args + " -print");
 		}
 
-		public static List<string> FindAllFilesInBranch(string pname, string branchName, DateTime since, DateTime until)
+		public List<string> FindAllFilesInBranch(DateTime since, DateTime until)
 		{
 			string args = string.Empty;
 
-			if (!string.IsNullOrWhiteSpace(branchName))
-				args += " -branch 'brtype(" + branchName + ")'";
+			if (!string.IsNullOrWhiteSpace(BranchName))
+				args += " -branch 'brtype(" + BranchName + ")'";
 
 			args += " -version '{created_since(" + since.AddSeconds(1).ToString() + ") && !created_since(" + until.AddSeconds(1).ToString() + ")}'";
 
-			Execute("find " + pname + args + " -print > " + IOHandler.CCoutPath);
-
-			return IOHandler.ReadCCout();
+			return GetExecutedResultList("find . " + args + " -print");
 		}
 
-    public static void ViewVersionTree(string pname)
+    public void ViewVersionTree(string filePath)
     {
-      Execute("lsvtree -graphical " + pname + "\\LATEST", false);
+			Execute("lsvtree -graphical " + filePath + "\\LATEST", false);
     }
 
-    public static void LabelLatestMain(string pname, string label)
+    public void LabelLatestMain(string filePath, string label)
     {
-      Execute("mklabel -replace -version \\main\\LATEST " + label + " " + pname, false);
+			Execute("mklabel -replace -version \\main\\LATEST " + label + " " + filePath, false);
     }
 
-		internal static List<CCElementVersion> FindAllSymbolicLinks()
+		internal List<CCElementVersion> FindAllSymbolicLinks()
 		{
 			List<CCElementVersion> resultSLinkList = new List<CCElementVersion>();
 			List<string> foundSLinkList;
 
-			Execute("find " + IOHandler.VobPath + " -type l -print > " + IOHandler.CCoutPath);
-			foundSLinkList = IOHandler.ReadCCout();
+			foundSLinkList = GetExecutedResultList("find " + VobPath + " -type l -print");
 
 			foundSLinkList.ForEach(link => resultSLinkList.Add(Describe(link)));
 			
 			return resultSLinkList;
 		}
 
-		internal static List<CCElementVersion> Lshistory(string pname)
+		internal List<CCElementVersion> Lshistory(string pname)
 		{
 			List<CCElementVersion> resultList = new List<CCElementVersion>();
 
-			Execute("lshistory -fmt " + Fmt + " " + pname + " > " + IOHandler.CCoutPath);
-			foreach (string info in IOHandler.ReadCCout())
-			{
-				resultList.Add(new CCElementVersion(info));
-			}
+			GetExecutedResultList("lshistory -fmt " + Fmt + " " + pname)
+				.ForEach(elemVersion => resultList.Add(new CCElementVersion(elemVersion)));
 
 			return resultList;
 		}
 
-		internal static List<CCElementVersion> Lshistory(string pname, DateTime since)
+		internal List<CCElementVersion> Lshistory(string pname, DateTime since)
 		{
 			List<CCElementVersion> resultList = new List<CCElementVersion>();
 
-			Execute("lshistory -fmt " + Fmt + " -since" + since.AddSeconds(1).ToString() + " " + pname + " > " + IOHandler.CCoutPath);
-			foreach (string info in IOHandler.ReadCCout())
-			{
-				resultList.Add(new CCElementVersion(info));
-			}
+			GetExecutedResultList("lshistory -fmt " + Fmt + " -since" + since.AddSeconds(1) + " " + pname)
+				.ForEach(elemVersion => resultList.Add(new CCElementVersion(elemVersion)));
 
 			return resultList;
 		}
 
-		internal static CCElementVersion Describe(string pname)
+		internal CCElementVersion Describe(string pname)
 		{
-			Execute("describe -fmt " + Fmt + " " + pname + " > " + IOHandler.CCoutPath); 
-			return new CCElementVersion(IOHandler.ReadCCout()[0]);
+			return new CCElementVersion(GetExecutedResult("describe -fmt " + Fmt + " " + pname)); 
 		}
 
-		internal static void Pwd()
+		internal string Pwd()
 		{
-			Execute("pwd > " + IOHandler.CCoutPath);
+			return GetExecutedResult("pwd");
 		}
 
-		internal static List<string> LscheckoutInCurrentViewByLoginUser()
+		internal List<string> LscheckoutInCurrentViewByLoginUser()
 		{
-			Execute("lscheckout -short -cview -me -recurse > " + IOHandler.CCoutPath);
-
-			return IOHandler.ReadCCout();
+			return GetExecutedResultList("lscheckout -short -cview -me -recurse");
 		}
 
-		internal static void Mount(string vobTag)
+		// vob path 의 상위 디렉터리에서 mount 를 실행해야 한다.
+		internal void Mount(string vobTag)
 		{
-			Execute(Path.GetDirectoryName(IOHandler.VobPath), "mount \\" + vobTag);
+			Execute("mount \\" + vobTag);
 		}
 
-		internal static void UMount(string vobTag)
+		// vob path 의 상위 디렉터리에서 umount 를 실행해야 한다.
+		internal void UMount(string vobTag)
 		{
-			Execute(Path.GetDirectoryName(IOHandler.VobPath), "umount \\" + vobTag);
+			Execute("umount \\" + vobTag);
 		}
 
-		internal static void Checkout(string pname)
+		internal void Checkout(string pname)
 		{
 			Execute("checkout -ncomment " + pname);
 		}
 
-		internal static void Uncheckout(string pname)
+		internal void Uncheckout(string pname)
 		{
 			Execute("uncheckout -keep " + pname);
 		}
 
-    protected static void Execute(string workingDirectory, string arg, bool wait = true)
+		protected override string Command
 		{
-			Process cleartool = new Process();
-
-			ProcessStartInfo proInfo = new ProcessStartInfo()
-			{
-				WorkingDirectory = workingDirectory,
-				FileName = @"powershell",
-				Arguments = Command + arg,
-				CreateNoWindow = true,
-				UseShellExecute = false,
-				RedirectStandardError = true
-			};
-
-			cleartool.StartInfo = proInfo;
-			cleartool.Start();
-			IOHandler.WriteLog(">>> " + DateTime.Now.ToString("yy-MM-dd HH:mm:ss") + " " + proInfo.Arguments + Environment.NewLine);
-			
-			if (wait)
-			{
-				using (StreamReader errReader = cleartool.StandardError)
-				{
-					string err = errReader.ReadToEnd(); // wait for exit
-					if (!string.IsNullOrWhiteSpace(err))
-						IOHandler.WriteLog(err);
-				}
-			}
+			get { return "cleartool"; }
 		}
 
-		protected static void Execute(string arg, bool wait = true)
+		protected override void ValidateBeforeExecution()
 		{
-			Execute(IOHandler.VobPath, arg, wait);
-		}
-	}
-
-	class CCElementVersion
-	{
-		public string Attributes { get; set; }
-		public string Comment { get; set; }
-		public DateTime CreatedDate { get; set; }
-		public string EventDescription { get; set; }
-		public string CheckoutInfo { get; set; }
-		public string HostName { get; set; }
-		public string IndentLevel { get; set; }
-		public string Labels { get; set; }
-		public string ObjectKind { get; set; }
-		public string ElementName { get; set; }
-		public string Version { get; set; }
-		public string PredecessorVersion { get; set; }
-		public string Operation { get; set; }
-		public string Type { get; set; }
-		public string SymbolicLink { get; set; }
-		public string OwnerLoginName { get; set; }
-		public string OwnerFullName { get; set; }
-		public string HyperLinkInfo { get; set; }
-		
-		public string Branch
-		{
-			get
-			{
-				string[] elemArr = Version.Split(new char[] { '\\', '/' });
-				return elemArr[elemArr.Length - 2];
-			}
-		}
-
-		public string RelativeFilePath
-		{
-			get
-			{
-				return IOHandler.EliminateVobPath(ElementName);
-			}
-		}
-
-		public string AbsoluteFilePath
-		{
-			get
-			{
-				return Path.Combine(IOHandler.VobPath, RelativeFilePath);
-			}
-		}
-
-		public CCElementVersion Predecessor { get; set; }
-		public CCElementVersion HyperLinkedFrom { get; set; }
-		public CCElementVersion HyperLinkedTo { get; set; }
-
-		internal CCElementVersion()
-		{
-		}
-
-		internal CCElementVersion(string versionInfo)
-		{
-			ParseFileInfo(versionInfo);
-		}
-
-		internal void ParseFileInfo(string versionInfo)
-		{
-			List<string> versionInfoList = new List<string>(versionInfo.Split('|'));
-			Dictionary<string, string> versionInfoDic = new Dictionary<string, string>();
-
-			foreach (string info in versionInfoList)
-			{
-				int i = info.IndexOf('=');
-				if (i < 0 || i == info.Length - 1)
-					continue;
-
-				string key = info.Substring(0, i);
-				string value = info.Substring(i + 1, info.Length - (i + 1));
-				versionInfoDic.Add(key, value);
-			}
-
-			foreach (KeyValuePair<string, string> pair in versionInfoDic)
-			{
-				System.Reflection.PropertyInfo propertyInfo = this.GetType().GetProperty(pair.Key);
-				if (propertyInfo != null && propertyInfo.PropertyType == typeof(string))
-					propertyInfo.SetValue(this, pair.Value);
-			}
-
-			CreatedDate = DateTime.Parse(versionInfoDic["CreatedDate"]);
-			
-			if(versionInfoDic.ContainsKey("SymbolicLink"))
-				SymbolicLink = Path.GetFullPath((new Uri(Path.Combine(IOHandler.VobPath, versionInfoDic["SymbolicLink"]))).LocalPath);
 		}
 	}
 }
