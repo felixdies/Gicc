@@ -138,24 +138,20 @@ namespace Gicc
 				{
 					BranchName = this.BranchName,
 					ExecutingPath = this.CWD,
-					OutPath = "ccout",
-					LogPath = "log"
+					OutPath = "giccout",
+					LogPath = "gicclog"
 				};
 			}
 		}
 		
 		#endregion Executor 생성자 정보
 
-		/// <summary>
-		/// Config 파일에 VobPath, BranchName, RepoPath 속성을 기록
-		/// </summary>
-		public void WriteConfig()
+		public void Clone()
 		{
-			File.WriteAllLines(ConfigPath,
-				new string[]{
-					"vob = " + VobPath
-				, "branch = " + BranchName
-				, "repository = " + RepoPath});
+			WriteConfig();
+			// todo : 최초 브랜치 checkin 지점 직전 snapshot 복사
+			// todo : pull tag
+			// todo : pull
 		}
 
 		public void Pull()
@@ -173,7 +169,44 @@ namespace Gicc
 
 			List<DateTime> commitPoints = GetCommitPoints(ccHistory);
 			for (int i = 0; i < commitPoints.Count - 2; i++)
-				CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]);
+				CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]); // todo: pull tag 가 since 가 돼야 함
+		}
+
+		public void Push()
+		{
+		}
+
+		public void ViewCCVersionTrees(string branchName)
+		{
+			this.BranchName = branchName;
+			ClearCase cc = new ClearCase(CCInfo);
+
+			cc.FindAllFilesInBranch().ForEach(filePath => cc.ViewVersionTree(filePath));
+		}
+
+		public void MakeCCLabel(string branchName, string label)
+		{
+			// todo: validate label
+
+			this.BranchName = branchName;
+			ClearCase cc = new ClearCase(CCInfo);
+			List<string> targetExtension = new List<string>(new string[] { ".aspx", ".ascx", ".js" });
+
+			cc.FindAllFilesInBranch()
+				.Where(filePath => targetExtension.Contains(Path.GetExtension(filePath))).ToList()
+				.ForEach(filePath => cc.LabelLatestMain(filePath, label));
+		}
+
+		/// <summary>
+		/// Config 파일에 VobPath, BranchName, RepoPath 속성을 기록
+		/// </summary>
+		void WriteConfig()
+		{
+			File.WriteAllLines(ConfigPath,
+				new string[]{
+					"vob = " + VobPath
+				, "branch = " + BranchName
+				, "repository = " + RepoPath});
 		}
 
 		private void CopyAndCommit(List<CCElementVersion> ccHistory, DateTime since, DateTime until)

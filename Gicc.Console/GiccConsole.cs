@@ -23,99 +23,40 @@ namespace Gicc.Console
       switch (args[0].ToLower())
       {
         case "clone":
-          Clone();
+          new Gicc(Environment.CurrentDirectory, args[1], args[2], args[3]).Clone();
           break;
+
         case "pull":
-          Pull();
+					new Gicc(Environment.CurrentDirectory, true).Pull();
           break;
+
         case "push":
-          Push();
+					new Gicc(Environment.CurrentDirectory, true).Push();
           break;
+
         case "tree": case "tr":
           if (args.Length < 2)
           {
             WriteLine(Usage.Tree);
             return;
           }
-          ViewCCVersionTree(args[1]);
+					new Gicc(Environment.CurrentDirectory, false).ViewCCVersionTrees(args[1]);
           break;
+
         case "label": case "lb":
           if (args.Length < 3)
           {
             WriteLine(Usage.Label);
             return;
           }
-          MakeCCLabel(args[1], args[2]);
+          new Gicc(Environment.CurrentDirectory, false).MakeCCLabel(args[1], args[2]);
           break;
+
         default:
           WriteLine(Usage.Main);
           return;
       }
 		}
-
-    static void Clone()
-    {
-    }
-
-    static void Pull()
-    {
-			try
-			{
-				new Gicc().Pull();
-			}
-			catch (GiccException exception)
-			{
-				System.Console.WriteLine(exception.Message);
-			}
-    }
-
-    static void Push()
-    {
-    }
-
-    static void ViewCCVersionTree(string branchName)
-    {
-      string gitPath = Path.Combine(Environment.CurrentDirectory, ".git");
-      bool gitInitialized = Directory.Exists(gitPath);
-
-      if (!gitInitialized)
-      {
-        Directory.CreateDirectory(Path.Combine(gitPath, "gicc"));
-        Gicc.SetConfig(Environment.CurrentDirectory, branchName, Environment.CurrentDirectory);
-      }
-
-      List<string> BranchFileList = ClearCase.FindAllFilesInBranch(Environment.CurrentDirectory, branchName);
-      BranchFileList.ForEach(filePath => ClearCase.ViewVersionTree(filePath));
-
-      if (!gitInitialized)
-        Directory.Delete(gitPath, true);
-    }
-
-    static void MakeCCLabel(string branchName, string label)
-    {
-      // todo: validate label
-
-      List<string> targetExtension = new List<string>(new string[] {".aspx", ".ascx", ".js"});
-      string gitPath = Path.Combine(Environment.CurrentDirectory, ".git");
-      bool gitInitialized = Directory.Exists(gitPath);
-
-      if (!gitInitialized)
-      {
-        Directory.CreateDirectory(Path.Combine(gitPath, "gicc"));
-        Gicc.SetConfig(Environment.CurrentDirectory, branchName, Environment.CurrentDirectory);
-      }
-
-      List<string> branchFileList = ClearCase.FindAllFilesInBranch(Environment.CurrentDirectory, branchName);
-      
-      foreach (string filePath in branchFileList)
-      {
-        if(targetExtension.Contains(Path.GetExtension(filePath)))
-          ClearCase.LabelLatestMain(filePath, label);
-      }
-
-      if (!gitInitialized)
-        Directory.Delete(gitPath);
-    }
 
     static void WriteLine(string value)
     {
