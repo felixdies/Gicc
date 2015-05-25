@@ -30,17 +30,19 @@ namespace Gicc.Test
 			Assert.AreEqual(REPO_PATH, gicc.RepoPath);
 		}
 
-		/*
 		[Test]
 		public void CopyAndCommitTest()
 		{
-			Git git = new Git(REPO_PATH);
-
+			// setup
 			CreateGitTestMockUp();
-			new Gicc().CopyAndCommit(CCHistoryList, git.LastGiccPull, DateTime.Now);
+			// setup
+
+			Gicc gicc = new Gicc(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH);
+			Git git = new Git(GitInfo);
+
+			gicc.CopyAndCommit(CCMockupHistoryList, git.LastGiccPull, DateTime.Now);
 			throw new NotImplementedException();
 		}
-		*/
 
 		[Test]
 		public void GetCommitPointsTest()
@@ -62,35 +64,5 @@ namespace Gicc.Test
 
 			Assert.AreEqual(expected, actual);
 		}
-
-		/*
-    [Test]
-    public void CheckAnyFileIsNotCheckedOutTest()
-    {
-      string checkoutFile = "main.txt";
-
-      new Gicc().CheckCheckedoutFileIsNotExist();
-
-      ClearCase.Checkout(checkoutFile);
-
-      try
-      {
-        new Gicc().CheckCheckedoutFileIsNotExist();
-      }
-      catch (GiccException ex)
-      {
-        Console.WriteLine("success : caught checkedout file");
-        Console.WriteLine(ex.Message);
-
-        return;
-      }
-      finally
-      {
-        ClearCase.Uncheckout(checkoutFile);
-      }
-
-      Assert.Fail("could not catch checkout file : " + checkoutFile);
-    }
-		 */
 	}
 }

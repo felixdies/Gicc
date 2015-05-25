@@ -46,16 +46,10 @@ namespace Gicc
 		{
 			get
 			{
-				switch (Operation)
-				{
-					case "checkin":
-					case "mkelem":
-						return 1;
-					case "rmelem":
-						return 2;
-					default:
-						return -1;
-				}
+				if (Operation == "rmver" || Operation == "rmhlink") // revert
+					return -1;
+				else // commit : "checkin", "mkelem", "rmelem", ...
+					return 0;
 			}
 		}
 

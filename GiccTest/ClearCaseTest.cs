@@ -195,5 +195,35 @@ namespace Gicc.Test
 
 			Assert.Fail(VOB_TAG + " 가 unmount 되었으나 유효성 검사를 통과 하였습니다.");
 		}
+
+		[Test]
+		public void CheckAnyFileIsNotCheckedOutTest()
+		{
+			string checkoutFile = "main.txt";
+
+			ClearCase cc = new ClearCase(BranchCCInfo);
+			
+			cc.CheckCheckedoutFileIsNotExist();
+
+			cc.Checkout(checkoutFile);
+
+			try
+			{
+				cc.CheckCheckedoutFileIsNotExist();
+			}
+			catch (GiccException ex)
+			{
+				Console.WriteLine("success : caught checkedout file");
+				Console.WriteLine(ex.Message);
+
+				return;
+			}
+			finally
+			{
+				cc.Uncheckout(checkoutFile);
+			}
+
+			Assert.Fail("could not catch checkout file : " + checkoutFile);
+		}
 	}
 }

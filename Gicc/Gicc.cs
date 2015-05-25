@@ -210,7 +210,7 @@ namespace Gicc
 				, "repository = " + RepoPath});
 		}
 
-		private void CopyAndCommit(List<CCElementVersion> ccHistory, DateTime since, DateTime until)
+		internal void CopyAndCommit(List<CCElementVersion> ccHistory, DateTime since, DateTime until)
 		{
 			Git git = new Git(GitInfo);
 			ClearCase mainCC = new ClearCase(MainCCInfo);

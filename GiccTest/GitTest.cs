@@ -38,6 +38,10 @@ namespace Gicc.Test
 		[Test]
 		public void LastGiccPullTest()
 		{
+			//setup
+			CreateGitTestMockUp();
+			//setup
+
 			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 5, 0), new Git(GitMockupInfo).LastGiccPull);
 		}
 
@@ -75,6 +79,11 @@ namespace Gicc.Test
 		[TestCase(@"dir\0", false)]
 		public void IsGitIgnoredTest(string path, bool result)
 		{
+			//setup
+			new Git(GitInfo).Init();
+			File.WriteAllText(Path.Combine(REPO_PATH, ".gitignore"), ResourceHandler.GetResource("gitignore.txt"));
+			//setup
+
 			Assert.AreEqual(new Git(GitInfo).IsIgnored(path), result);
 		}
 	}

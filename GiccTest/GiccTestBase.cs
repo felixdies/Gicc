@@ -21,8 +21,8 @@ namespace Gicc.Test
 		protected string REPO_PATH = ConfigurationManager.AppSettings["RepoPath"];
 		protected string REPO_MOCKUP_PATH = ConfigurationManager.AppSettings["RepoMockupPath"];
 
-		protected string GICC_PATH { get { return Path.Combine(REPO_PATH, ".git/gicc"); } }
-		protected string GICC_MOCKUP_PATH { get { return Path.Combine(REPO_MOCKUP_PATH, ".git/gicc"); } }
+		protected string GICC_PATH { get { return Path.Combine(REPO_PATH, @".git\gicc"); } }
+		protected string GICC_MOCKUP_PATH { get { return Path.Combine(REPO_MOCKUP_PATH, @".git\gicc"); } }
 
 		protected GitConstructInfo GitInfo
 		{
@@ -147,7 +147,7 @@ namespace Gicc.Test
 					CreatedDate = checkinTime.AddMinutes(12),
 					ElementName = "tt.txt",
 					Version = @"\main\3",
-					Operation = "rmelem",
+					Operation = "rmver",
 					OwnerFullName = "A"
 				}
 				);
@@ -247,7 +247,7 @@ namespace Gicc.Test
 					CreatedDate = checkinTime.AddMinutes(13),
 					ElementName = "tt.txt",
 					Version = @"\main\4",
-					Operation = "rmelem",
+					Operation = "rmver",
 					OwnerFullName = "B"
 				}
 				);
@@ -258,9 +258,7 @@ namespace Gicc.Test
 
 		public void CreateGitTestMockUp()
 		{
-			string MOCKUP_PATH = Path.Combine(Directory.GetParent(REPO_PATH).ToString(), "gicctest_mockup");
-
-			if (Directory.Exists(MOCKUP_PATH))
+			if (Directory.Exists(REPO_MOCKUP_PATH))
 				return;
 
 			string cachedCWD = Environment.CurrentDirectory;
@@ -273,10 +271,10 @@ namespace Gicc.Test
 			string authorB = "B <B@B.B>";
 			DateTime commitTime = new DateTime(2015, 05, 01, 01, 0, 0);
 
-			Directory.CreateDirectory(Path.Combine(MOCKUP_PATH, @".git/gicc"));
+			Directory.CreateDirectory(Path.Combine(REPO_MOCKUP_PATH, @".git/gicc"));
 
-			Environment.CurrentDirectory = MOCKUP_PATH;
-			new Gicc(MOCKUP_PATH, CC_TEST_PATH, BRANCH_NAME, MOCKUP_PATH).WriteConfig();
+			Environment.CurrentDirectory = REPO_MOCKUP_PATH;
+			new Gicc(REPO_MOCKUP_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_MOCKUP_PATH).WriteConfig();
 
 			git.Init();
 			File.WriteAllText(tt, string.Empty);
