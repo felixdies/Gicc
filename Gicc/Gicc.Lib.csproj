@@ -39,14 +39,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CCElementVersion.cs" />
     <Compile Include="ClearCase.cs" />
     <Compile Include="Executor.cs" />
     <Compile Include="GiccException.cs" />
     <Compile Include="Git.cs" />
-    <None Include="IOHandler.cs">
-      <SubType>Code</SubType>
-    </None>
     <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Gicc.cs" />

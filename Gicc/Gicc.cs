@@ -10,129 +10,226 @@ namespace Gicc
 {
 	public class Gicc
 	{
+		/// <summary>
+		/// Pull, Push 명령어 실행 시 호출되는 생성자
+		/// </summary>
+		/// <param name="cwd"></param>
+		public Gicc(string cwd)
+		{
+			this.CWD = cwd;
+			ParseAllConfigsFromConfigFile();
+		}
+
+		/// <summary>
+		/// Label, Tree 명령어 실행 시 호출되는 생성자
+		/// </summary>
+		/// <param name="cwd"></param>
+		public Gicc(string cwd, string branchName)
+		{
+			this.CWD = cwd;
+			this.BranchName = branchName;
+		}
+
+		/// <summary>
+		/// Clone 명령어 실행 시 호출되는 생성자
+		/// </summary>
+		/// <param name="vobPath"></param>
+		/// <param name="branchName"></param>
+		/// <param name="repoPath"></param>
+		public Gicc(string cwd, string vobPath, string branchName, string repoPath)
+		{
+			this.CWD = cwd;
+			this.VobPath = vobPath;
+			this.BranchName = branchName;
+			this.RepoPath = repoPath;
+		}
+
 		string CWD { get; set; }
-		string GiccPath
-		{
-			get
-			{
-				return Path.Combine(CWD, @".git\gicc");
-			}
-		}
-		string ConfigPath
-		{
-			get
-			{
-				return Path.Combine(GiccPath, "config");
-			}
-		}
-		string CCoutPath
-		{
-			get { return Path.Combine(GiccPath, "ccout"); }
-		}
-		string GitoutPath
-		{
-			get { return Path.Combine(GiccPath, "gitout"); }
-		}
+		string GiccPath { get { return Path.Combine(CWD, @".git\gicc"); } }
+		string ConfigPath { get { return Path.Combine(GiccPath, "config"); } }
+
+		#region Clone, Pull, Push 실행 필수 정보
+		// Clone : 매개변수로 주어짐.
+		// Pull, Push : config 파일에서 읽어 옴
+
 		string VobPath { get; set; }
 		string BranchName { get; set; }
 		string RepoPath { get; set; }
 
-		public Gicc()
+		void ParseAllConfigsFromConfigFile()
 		{
-			CWD = Environment.CurrentDirectory;
-			ParseAllConfigs();
+			if (!File.Exists(ConfigPath))
+				throw new GiccException("Gicc 설정 파일을 찾을 수 없습니다. 현재 위치가 Local 저장소의 최상위 폴더가 맞는 지 확인 해 주세요.");
+
+			VobPath = ParseConfigFromConfigFile("vob");
+			BranchName = ParseConfigFromConfigFile("branch");
+			RepoPath = ParseConfigFromConfigFile("repository");
 		}
 
-		public Gicc(string cwd)
-		{
-			this.CWD = cwd;
-			ParseAllConfigs();
-		}
-
-		public void WriteConfig(string vobPath, string branchName, string repoPath)
-		{
-			string[] config = new string[]{
-				"vob = " + vobPath
-				, "branch = " + branchName
-				, "repository = " + repoPath};
-
-			File.WriteAllLines(ConfigPath, config);
-		}
-		
-		void ParseAllConfigs()
-		{
-			if(!File.Exists(ConfigPath))
-				return;
-
-			VobPath = ParseConfig("vob");
-			BranchName = ParseConfig("branch");
-			RepoPath = ParseConfig("repository");
-		}
-
-		string ParseConfig(string configName)
+		string ParseConfigFromConfigFile(string configName)
 		{
 			return File.ReadAllLines(ConfigPath).ToList().Find(config => config.ToLower().StartsWith(configName)).Split('=').Last().Trim();
 		}
 
+		#endregion Clone, Pull, Push 실행 필수 정보
+
+		#region Executor 생성자 정보
+
+		/// <summary>
+		/// git 실행 정보.
+		/// git 실행 경로는 언제나 local repository 이다.
+		/// </summary>
+		GitConstructInfo GitInfo
+		{
+			get
+			{
+				return new GitConstructInfo()
+				{
+					RepoPath = this.RepoPath,
+					BranchName = this.BranchName,
+					ExecutingPath = this.RepoPath,
+					OutPath = Path.Combine(this.GiccPath, "gitout"),
+					LogPath = Path.Combine(this.GiccPath, "log")
+				};
+			}
+		}
+
+		/// <summary>
+		/// main Branch 의 cc 실행 정보.
+		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
+		/// </summary>
+		CCConstructInfo MainCCInfo
+		{
+			get
+			{
+				return new CCConstructInfo()
+				{
+					VobPath = this.VobPath,
+					BranchName = "main",
+					ExecutingPath = this.VobPath,
+					OutPath = Path.Combine(this.GiccPath, "ccout"),
+					LogPath = Path.Combine(this.GiccPath, "log")
+				};
+			}
+		}
+
+		/// <summary>
+		/// 특정 Branch 의 cc 실행 정보.
+		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
+		/// </summary>
+		CCConstructInfo BranchCCInfo
+		{
+			get
+			{
+				return new CCConstructInfo()
+				{
+					VobPath = this.VobPath,
+					BranchName = this.BranchName,
+					ExecutingPath = this.VobPath,
+					OutPath = Path.Combine(this.GiccPath, "ccout"),
+					LogPath = Path.Combine(this.GiccPath, "log")
+				};
+			}
+		}
+
+		/// <summary>
+		/// Git 과 상관 없이 CC 를 실행 할 때 사용하는 생성자 정보
+		/// </summary>
+		ExecutorConstructInfo CCInfo
+		{
+			get
+			{
+				return new ExecutorConstructInfo()
+				{
+					BranchName = this.BranchName,
+					ExecutingPath = this.CWD,
+					OutPath = "ccout",
+					LogPath = "log"
+				};
+			}
+		}
+		
+		#endregion Executor 생성자 정보
+
+		/// <summary>
+		/// Config 파일에 VobPath, BranchName, RepoPath 속성을 기록
+		/// </summary>
+		public void WriteConfig()
+		{
+			File.WriteAllLines(ConfigPath,
+				new string[]{
+					"vob = " + VobPath
+				, "branch = " + BranchName
+				, "repository = " + RepoPath});
+		}
+
 		public void Pull()
 		{
+			Git git = new Git(GitInfo);
+			ClearCase cc = new ClearCase(BranchCCInfo);
 			List<CCElementVersion> ccHistory = null;
-			ClearCase cc = new ClearCase(VobPath, BranchName);
 
-			cc.CheckCheckedoutFileIsNotExist();
 			cc.CheckAllSymbolicLinksAreMounted();
-			cc.CheckModifiedFileIsNotExist();
+			cc.CheckCheckedoutFileIsNotExist();
+			git.CheckModifiedFileIsNotExist();
 
 			List<string> branchFileList = cc.FindAllFilesInBranch();
-			branchFileList.ForEach(file => ccHistory.AddRange(new ClearCase(VobPath).Lshistory(file)));
+			branchFileList.ForEach(file => ccHistory.AddRange(cc.Lshistory(file)));
 
 			List<DateTime> commitPoints = GetCommitPoints(ccHistory);
 			for (int i = 0; i < commitPoints.Count - 2; i++)
 				CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]);
 		}
 
-		internal void CopyAndCommit(List<CCElementVersion> ccHistory, DateTime since, DateTime until)
+		private void CopyAndCommit(List<CCElementVersion> ccHistory, DateTime since, DateTime until)
 		{
-			Git git = new Git(IOHandler.RepoPath);
+			Git git = new Git(GitInfo);
+			ClearCase mainCC = new ClearCase(MainCCInfo);
+			ClearCase branchCC = new ClearCase(BranchCCInfo);
 			string author = "gicc <gicc@test.test>"; // todo : implement
 
 			// main -> master
-			ClearCase mainCC = new ClearCase(VobPath, "main");
 			mainCC.SetBranchCS(until);
 			git.Checkout("master");
 			
 			List<string> mainFileList = mainCC.FindAllFilesInBranch(since, until);
+			CopyFromVOBToRepo(mainFileList);
+			
+			git.AddCommit("gicc", author);
+			git.TagPull(); // todo : if changed
+
+			// vob branch -> git branch
+			branchCC.SetBranchCS(until);
+			git.Checkout(BranchName);
+
+			List<string> branchFileList = ccHistory
+				.Where(elemVer => elemVer.CreatedDate > since && elemVer.CreatedDate <= until) // todo : pull 에서 날짜 제한 걸어주면 필요 없을 듯
+				.Select(elemVer => elemVer.ElementName).ToList()
+				.Distinct().ToList();
+			CopyFromVOBToRepo(branchFileList);
+			
+			git.AddCommit("gicc", author);
+			git.TagPull(); // todo : if changed
+		}
+
+		private void CopyFromVOBToRepo(List<string> mainFileList)
+		{
+			Git git = new Git(GitInfo);
+
 			foreach (string relativeFilePath in mainFileList)
 			{
 				if (!git.IsIgnored(relativeFilePath))
-					IOHandler.Copy(System.IO.Path.Combine(IOHandler.VobPath,relativeFilePath), 
-						System.IO.Path.Combine(IOHandler.RepoPath, relativeFilePath));
+					File.Copy(Path.Combine(VobPath, relativeFilePath), Path.Combine(RepoPath, relativeFilePath), true);
 			}
-			git.AddCommit("gicc", author);
-			git.TagPull();
-
-			// vob branch -> git branch
-			ClearCase branchCC = new ClearCase(VobPath, BranchName);
-			branchCC.SetBranchCS(until);
-			git.Checkout(IOHandler.BranchName);
-
-			List<string> branchFileList = ccHistory
-				.Where(elemVer => elemVer.CreatedDate > since && elemVer.CreatedDate <= until)
-				.Select(elemVer => elemVer.AbsoluteFilePath).ToList()
-				.Distinct().ToList();
-
-			foreach (string absFilePath in branchFileList)
-			{
-				string relativeFilePath = IOHandler.EliminateVobPath(absFilePath);
-				if (!git.IsIgnored(relativeFilePath))
-					IOHandler.Copy(absFilePath, System.IO.Path.Combine(IOHandler.RepoPath, relativeFilePath));
-			}
-
-			git.AddCommit("gicc", author);
-			git.TagPull();
 		}
 
-		internal List<DateTime> GetCommitPoints(List<CCElementVersion> ccHistory)
+		/// <summary>
+		/// 매개변수로 전달 된 cc history 를 snapshot 으로 만들기 위해, commit points 를 잡는다.
+		/// 동일 브랜치 내에서 한 명의 사용자가 연속으로 check in 한 기록이 하나의 snapshot 이 된다.
+		/// </summary>
+		/// <param name="ccHistory"></param>
+		/// <returns></returns>
+		private List<DateTime> GetCommitPoints(List<CCElementVersion> ccHistory)
 		{
 			List<DateTime> resultCommitPoints = new List<DateTime>();
 			List<CCElementVersion> orderedHistory = ccHistory.OrderBy(x => x.CreatedDate).ToList();

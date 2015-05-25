@@ -9,27 +9,15 @@ using System.Diagnostics;
 
 namespace Gicc
 {
-  public class Git : Executor
+  class Git : Executor
   {
-		public Git(string executingPath, string giccPath)
-			: base(executingPath, giccPath + @"\gitout", giccPath + @"\log") { }
-
-		public Git(string executingPath, string giccPath, string branchName)
-			: base(executingPath, giccPath + @"\gitout", giccPath + @"\log")
+		public Git(GitConstructInfo constructInfo)
+			: base(constructInfo)
 		{
-			this.BranchName = branchName;
+			this.RepoPath = constructInfo.RepoPath;
 		}
 
-		public Git(string executingPath, string outPath, string logPath, string branchName)
-			: base(executingPath, outPath, logPath)
-		{
-			this.BranchName = branchName;
-		}
-
-		internal string RepositoryPath
-		{
-			get { return GetExecutedResult("rev-parse --show-toplevel"); }
-		}
+		string RepoPath { get; set; }
 
 		internal string CurrentBranch
 		{
@@ -63,19 +51,17 @@ namespace Gicc
 
 		internal void CheckModifiedFileIsNotExist()
 		{
-			List<string> untrackedFileList = UntrackedFileList;
-			if (untrackedFileList.Count > 0)
+			if (UntrackedFileList.Count > 0)
 			{
 				string message = "새로 추가된 후 commit 되지 않은 파일이 있습니다." + Environment.NewLine;
-				message += string.Join(Environment.NewLine, untrackedFileList);
+				message += string.Join(Environment.NewLine, UntrackedFileList);
 				throw new GiccException(message);
 			}
 
-			List<string> modifiedFileList = ModifiedFileList;
-			if (modifiedFileList.Count > 0)
+			if (ModifiedFileList.Count > 0)
 			{
 				string message = "변경된 후 commit 되지 않은 파일이 있습니다." + Environment.NewLine;
-				message += string.Join(Environment.NewLine, modifiedFileList);
+				message += string.Join(Environment.NewLine, ModifiedFileList);
 				throw new GiccException(message);
 			}
 		}
@@ -129,11 +115,10 @@ namespace Gicc
 		{
 			get { return "git"; }
 		}
-
-		protected override void ValidateBeforeExecution()
-		{
-			if (!File.Exists(OutPath))
-				throw new GiccException("출력 경로를 찾을 수 없습니다. 현재 위치가 Local 저장소의 최상위 폴더가 맞는 지 확인 해 주세요.");
-		}
   }
+
+	class GitConstructInfo : ExecutorConstructInfo
+	{
+		public string RepoPath { get; set; }
+	}
 }

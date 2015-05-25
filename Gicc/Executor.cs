@@ -9,13 +9,15 @@ using System.Diagnostics;
 
 namespace Gicc
 {
-	public abstract class Executor
+	abstract class Executor
 	{
-		public Executor(string executingPath, string outPath, string logPath)
+		public Executor(ExecutorConstructInfo constructInfo)
 		{
-			this.ExecutingPath = executingPath;
-			this.OutPath = outPath;
-			this.LogPath = logPath;
+			this.BranchName = constructInfo.BranchName;
+
+			this.ExecutingPath = constructInfo.ExecutingPath;
+			this.OutPath = constructInfo.OutPath;
+			this.LogPath = constructInfo.LogPath;
 		}
 
 		internal string BranchName { get; set; }
@@ -23,14 +25,11 @@ namespace Gicc
 		protected string ExecutingPath { get; set; }
 		protected string OutPath { get; set; }
 		protected string LogPath { get; set; }
+		
 		protected abstract string Command { get; }
-
-		protected abstract void ValidateBeforeExecution();
 
 		protected void Execute(string arg, bool wait = true)
 		{
-			ValidateBeforeExecution();
-
 			Process proc = new Process();
 			ProcessStartInfo proInfo = new ProcessStartInfo()
 			{
@@ -68,5 +67,57 @@ namespace Gicc
 			Execute(arg + " > " + OutPath);
 			return File.ReadAllLines(OutPath).ToList();
 		}
+	}
+
+	class ExecutorConstructInfo
+	{
+		private string _executingPath;
+		private string _outPath;
+		private string _logPath;
+
+		public string ExecutingPath
+		{
+			get
+			{
+				if (_executingPath == null)
+				{
+					Console.WriteLine(Environment.StackTrace);
+					throw new NullReferenceException("ExecutorConstructInfo 의 ExecutingPath 가 선언되지 않았습니다.");
+				}
+				else
+					return _executingPath;
+			}
+			set { _executingPath = value; }
+		}
+		public string OutPath
+		{
+			get
+			{
+				if (_outPath == null)
+				{
+					Console.WriteLine(Environment.StackTrace);
+					throw new NullReferenceException("ExecutorConstructInfo 의 OutPath 가 선언되지 않았습니다.");
+				}
+				else
+					return _outPath;
+			}
+			set { _outPath = value; }
+		}
+		public string LogPath
+		{
+			get
+			{
+				if (_logPath == null)
+				{
+					Console.WriteLine(Environment.StackTrace);
+					throw new NullReferenceException("ExecutorConstructInfo 의 LogPath 가 선언되지 않았습니다.");
+				}
+				else
+					return _logPath;
+			}
+			set { _logPath = value; }
+		}
+
+		public string BranchName { get; set; }
 	}
 }
