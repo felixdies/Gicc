@@ -11,37 +11,32 @@ namespace Gicc
 	public class Gicc
 	{
 		/// <summary>
-		/// Pull, Push 명령어 실행 시 호출되는 생성자
+		/// Clone 이외 명령어 실행 시 호출되는 생성자
 		/// </summary>
 		/// <param name="cwd"></param>
-		public Gicc(string cwd)
+		/// <param name="parseConfigs">
+		/// config 값 파싱 여부 : Pull, Push - true / Label, Tree - false
+		/// </param>
+		public Gicc(string cwd, bool parseConfigs)
 		{
 			this.CWD = cwd;
-			ParseAllConfigsFromConfigFile();
-		}
-
-		/// <summary>
-		/// Label, Tree 명령어 실행 시 호출되는 생성자
-		/// </summary>
-		/// <param name="cwd"></param>
-		public Gicc(string cwd, string branchName)
-		{
-			this.CWD = cwd;
-			this.BranchName = branchName;
+			
+			if(parseConfigs)
+				ParseAllConfigsFromConfigFile();
 		}
 
 		/// <summary>
 		/// Clone 명령어 실행 시 호출되는 생성자
 		/// </summary>
-		/// <param name="vobPath"></param>
+		/// <param name="absVobPath"></param>
 		/// <param name="branchName"></param>
-		/// <param name="repoPath"></param>
-		public Gicc(string cwd, string vobPath, string branchName, string repoPath)
+		/// <param name="absRepoPath"></param>
+		public Gicc(string cwd, string absVobPath, string branchName, string absRepoPath)
 		{
 			this.CWD = cwd;
-			this.VobPath = vobPath;
+			this.VobPath = absVobPath;
 			this.BranchName = branchName;
-			this.RepoPath = repoPath;
+			this.RepoPath = absRepoPath;
 		}
 
 		string CWD { get; set; }
