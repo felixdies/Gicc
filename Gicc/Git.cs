@@ -66,6 +66,11 @@ namespace Gicc
 			}
 		}
 
+		internal string Init()
+		{
+			return GetExecutedResult("init");
+		}
+
 		internal string Help()
 		{
 			return GetExecutedResult("help");
@@ -116,9 +121,4 @@ namespace Gicc
 			get { return "git"; }
 		}
   }
-
-	class GitConstructInfo : ExecutorConstructInfo
-	{
-		public string RepoPath { get; set; }
-	}
 }

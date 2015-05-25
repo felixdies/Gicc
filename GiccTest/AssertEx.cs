@@ -11,9 +11,9 @@ using NUnit.Framework;
 
 namespace Gicc.Test
 {
-    // Use reflection to Compare two objects.
-    // At first I tried to use JSON serialization to compare objects,
-    // but it failed cuz it didn't serialize properties in alphabetical order.
+	// Use reflection to Compare two objects.
+	// At first I tried to use JSON serialization to compare objects,
+	// but it failed cuz it didn't serialize properties in alphabetical order.
 	public class AssertEx
 	{
 		public static void PropertyValuesAreEquals(object expected, object actual)

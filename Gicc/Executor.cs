@@ -69,7 +69,7 @@ namespace Gicc
 		}
 	}
 
-	class ExecutorConstructInfo
+	public class ExecutorConstructInfo
 	{
 		private string _executingPath;
 		private string _outPath;

@@ -16,10 +16,21 @@ namespace Gicc.Test
 	public class GitTest : GiccTestBase
 	{
 		[Test]
+		public void InitTest()
+		{
+			FileEx.DeleteIfExists(Path.Combine(REPO_PATH, ".git"));
+
+			string expectedStart = "Initialized empty Git repository ";
+			string actual = new Git(GitInfo).Init();
+
+			Assert.True(actual.StartsWith(expectedStart));
+		}
+
+		[Test]
 		public void HelpTest()
 		{
 			string expectedStart = "usage: git ";
-			string actual = new Git(REPO_PATH).Help();
+			string actual = new Git(GitInfo).Help();
 
 			Assert.True(actual.StartsWith(expectedStart));
 		}
@@ -27,37 +38,25 @@ namespace Gicc.Test
 		[Test]
 		public void LastGiccPullTest()
 		{
-			string MOCKUP_PATH = Path.Combine(Directory.GetParent(REPO_PATH).ToString(), "gicctest_mockup");
-
-			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 5, 0), new Git(MOCKUP_PATH).LastGiccPull);
+			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 5, 0), new Git(GitMockupInfo).LastGiccPull);
 		}
 
 		[Test]
 		public void GetUntrackedFileTest()
 		{
 			List<string> expected = new List<string>(new string[] { "b", "c" });
-			List<string> actual = new Git(REPO_PATH).GetUntrackedFileList();
+			List<string> actual = new Git(GitInfo).UntrackedFileList;
 
-			// test completed
-			//Assert.That(actual, Is.EquivalentTo(expected));
+			Assert.That(actual, Is.EquivalentTo(expected));
 		}
 
 		[Test]
 		public void Diff()
 		{
-			List<string> expected = new List<string>(new string[] {
-				"a"});
-			List<string> actual = new Git(REPO_PATH).GetModifiedFileList();
+			List<string> expected = new List<string>(new string[] { "a" });
+			List<string> actual = new Git(GitInfo).ModifiedFileList;
 
-			// test completed
-			//Assert.That(actual, Is.EquivalentTo(expected));
-		}
-
-		[TearDown]
-		public void CleanUp()
-		{
-			//Environment.CurrentDirectory = Directory.GetDirectoryRoot(REPO_PATH);
-			//FileEx.DeleteIfExists(Path.Combine(REPO_PATH));
+			Assert.That(actual, Is.EquivalentTo(expected));
 		}
 
 		[TestCase(@".builds", true)]
@@ -76,7 +75,7 @@ namespace Gicc.Test
 		[TestCase(@"dir\0", false)]
 		public void IsGitIgnoredTest(string path, bool result)
 		{
-			Assert.AreEqual(new Git(REPO_PATH).IsIgnored(path), result);
+			Assert.AreEqual(new Git(GitInfo).IsIgnored(path), result);
 		}
 	}
 }

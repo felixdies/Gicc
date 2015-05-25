@@ -15,6 +15,8 @@ namespace Gicc.Test
 	[TestFixture]
 	public class ClearCaseTest : GiccTestBase
 	{
+		string VOB_TAG = System.Configuration.ConfigurationManager.AppSettings["VobTag"];
+		/*
 		[Test]
 		public void FindAllSymbolicLinksTest()
 		{
@@ -131,6 +133,29 @@ namespace Gicc.Test
 
 			Assert.That(actual, Is.EquivalentTo(expected));
 		}
+
+		[Test]
+		public void CheckAllSymbolicLinksAreMountedTest()
+		{
+			// setup
+			SetConfig(VOB_PATH, IOHandler.BranchName, IOHandler.RepoPath);
+
+			new ClearCase(Path.GetDirectoryName(VOB_PATH)).Mount(VOB_TAG);
+			new ClearCase(VOB_PATH).CheckAllSymbolicLinksAreMounted();
+
+			new ClearCase(Path.GetDirectoryName(VOB_PATH)).UMount(VOB_TAG);
+			try
+			{
+				new ClearCase(VOB_PATH).CheckAllSymbolicLinksAreMounted();
+			}
+			catch (GiccException ex)
+			{
+				Console.WriteLine(ex.Message);
+				return;
+			}
+
+			Assert.Fail(VOB_TAG + " 가 unmount 되었으나 유효성 검사를 통과 하였습니다.");
+		}
 	}
 
 	[TestFixture]
@@ -162,6 +187,6 @@ namespace Gicc.Test
 			
 			expected.CreatedDate = DateTime.Now;
 			AssertEx.PropertyValuesAreNotEquals(expected, actual);
-		}
+		}*/
 	}
 }

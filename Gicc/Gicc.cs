@@ -39,17 +39,17 @@ namespace Gicc
 			this.RepoPath = absRepoPath;
 		}
 
-		string CWD { get; set; }
-		string GiccPath { get { return Path.Combine(CWD, @".git\gicc"); } }
-		string ConfigPath { get { return Path.Combine(GiccPath, "config"); } }
+		internal string CWD { get; set; }
+		internal string GiccPath { get { return Path.Combine(CWD, @".git\gicc"); } }
+		internal string ConfigPath { get { return Path.Combine(GiccPath, "config"); } }
 
 		#region Clone, Pull, Push 실행 필수 정보
 		// Clone : 매개변수로 주어짐.
 		// Pull, Push : config 파일에서 읽어 옴
 
-		string VobPath { get; set; }
-		string BranchName { get; set; }
-		string RepoPath { get; set; }
+		internal string VobPath { get; set; }
+		internal string BranchName { get; set; }
+		internal string RepoPath { get; set; }
 
 		void ParseAllConfigsFromConfigFile()
 		{
@@ -93,11 +93,11 @@ namespace Gicc
 		/// main Branch 의 cc 실행 정보.
 		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
 		/// </summary>
-		CCConstructInfo MainCCInfo
+		ClearCaseConstructInfo MainCCInfo
 		{
 			get
 			{
-				return new CCConstructInfo()
+				return new ClearCaseConstructInfo()
 				{
 					VobPath = this.VobPath,
 					BranchName = "main",
@@ -112,11 +112,11 @@ namespace Gicc
 		/// 특정 Branch 의 cc 실행 정보.
 		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
 		/// </summary>
-		CCConstructInfo BranchCCInfo
+		ClearCaseConstructInfo BranchCCInfo
 		{
 			get
 			{
-				return new CCConstructInfo()
+				return new ClearCaseConstructInfo()
 				{
 					VobPath = this.VobPath,
 					BranchName = this.BranchName,
@@ -148,6 +148,7 @@ namespace Gicc
 
 		public void Clone()
 		{
+			// todo : init git
 			WriteConfig();
 			// todo : 최초 브랜치 checkin 지점 직전 snapshot 복사
 			// todo : pull tag
@@ -200,7 +201,7 @@ namespace Gicc
 		/// <summary>
 		/// Config 파일에 VobPath, BranchName, RepoPath 속성을 기록
 		/// </summary>
-		void WriteConfig()
+		internal void WriteConfig()
 		{
 			File.WriteAllLines(ConfigPath,
 				new string[]{
@@ -257,7 +258,7 @@ namespace Gicc
 		/// </summary>
 		/// <param name="ccHistory"></param>
 		/// <returns></returns>
-		private List<DateTime> GetCommitPoints(List<CCElementVersion> ccHistory)
+		internal List<DateTime> GetCommitPoints(List<CCElementVersion> ccHistory)
 		{
 			List<DateTime> resultCommitPoints = new List<DateTime>();
 			List<CCElementVersion> orderedHistory = ccHistory.OrderBy(x => x.CreatedDate).ToList();
@@ -271,7 +272,8 @@ namespace Gicc
 				}
 
 				if (orderedHistory[i].Branch == orderedHistory[i + 1].Branch
-					&& orderedHistory[i].OwnerFullName == orderedHistory[i + 1].OwnerFullName)
+					&& orderedHistory[i].OwnerFullName == orderedHistory[i + 1].OwnerFullName
+					&& orderedHistory[i].OperationGroup == orderedHistory[i + 1].OperationGroup)
 				{
 					continue;
 				}
