@@ -43,6 +43,7 @@
     <Compile Include="ClearCase.cs" />
     <Compile Include="ClearCaseConstructInfo.cs" />
     <Compile Include="Executor.cs" />
+    <Compile Include="ExecutorConstructInfo.cs" />
     <Compile Include="GiccException.cs" />
     <Compile Include="Git.cs" />
     <Compile Include="GitConstructInfo.cs" />

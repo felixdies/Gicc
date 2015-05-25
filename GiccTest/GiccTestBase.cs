@@ -323,27 +323,5 @@ namespace Gicc.Test
 
 			Environment.CurrentDirectory = cachedCWD;
 		}
-
-		/*
-		[SetUp]
-		public void initBase()
-		{
-			if (!Directory.Exists(GICC_PATH))
-				Directory.CreateDirectory(GICC_PATH);
-
-			Environment.CurrentDirectory = Path.GetFullPath(REPO_PATH);
-
-			FileEx.BackUp(Path.Combine(GICC_PATH, "config"));
-
-			SetConfig(CC_TEST_PATH, BRANCH_NAME, REPO_PATH);
-		}
-
-		[TearDown]
-		public void ClearUpBase()
-		{
-			// delete config
-			FileEx.Restore(Path.Combine(REPO_PATH, ".git/gicc/config"));
-		}
-		 */
 	}
 }

@@ -16,33 +16,94 @@ namespace Gicc.Test
 	public class ClearCaseTest : GiccTestBase
 	{
 		string VOB_TAG = System.Configuration.ConfigurationManager.AppSettings["VobTag"];
-		/*
-		[Test]
-		public void FindAllSymbolicLinksTest()
+		
+		/// <summary>
+		/// main Branch 의 cc 실행 정보.
+		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
+		/// </summary>
+		ClearCaseConstructInfo MainCCInfo
 		{
-			SetConfig(VOB_PATH, BRANCH_NAME, REPO_PATH);
-			string expected = CC_SYMBOLIC_LINK_PATH;
-			List<CCElementVersion> actual = ClearCase.FindAllSymbolicLinks();
+			get
+			{
+				return new ClearCaseConstructInfo()
+				{
+					VobPath = VOB_PATH,
+					BranchName = "main",
+					ExecutingPath = CC_TEST_PATH,
+					OutPath = Path.Combine(GICC_PATH, "ccout"),
+					LogPath = Path.Combine(GICC_PATH, "log")
+				};
+			}
+		}
 
-			Assert.AreEqual(expected, actual[0].SymbolicLink);
+		/// <summary>
+		/// 특정 Branch 의 cc 실행 정보.
+		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
+		/// </summary>
+		ClearCaseConstructInfo BranchCCInfo
+		{
+			get
+			{
+				return new ClearCaseConstructInfo()
+				{
+					VobPath = VOB_PATH,
+					BranchName = BRANCH_NAME,
+					ExecutingPath = CC_TEST_PATH,
+					OutPath = Path.Combine(GICC_PATH, "ccout"),
+					LogPath = Path.Combine(GICC_PATH, "log")
+				};
+			}
+		}
+
+		/// <summary>
+		/// Git 과 상관 없이 CC 를 실행 할 때 사용하는 생성자 정보
+		/// </summary>
+		ExecutorConstructInfo CCInfo
+		{
+			get
+			{
+				return new ExecutorConstructInfo()
+				{
+					BranchName = BRANCH_NAME,
+					ExecutingPath = CC_TEST_PATH,
+					OutPath = "giccout",
+					LogPath = "gicclog"
+				};
+			}
+		}
+		
+		[Test]
+		public void PwdTest()
+		{
+			Assert.AreEqual(CC_TEST_PATH, new ClearCase(BranchCCInfo).Pwd());
 		}
 
 		[Test]
-		public void GetConfigSpecTest()
+		public void FindAllSymbolicLinksTest()
 		{
-			// setup
-			ClearCase.SetDefaultCS();
+			string expected = CC_SYMBOLIC_LINK_PATH;
+			string actual = new ClearCase(BranchCCInfo).FindAllSymbolicLinks()[0].SymbolicLink;
+
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		// CastCS() is tested as well.
+		public void SetDefaultCSTest()
+		{
+			new ClearCase(BranchCCInfo).SetDefaultCS();
 
 			List<string> expected = new List<string>(
 				new string[] {"element * CHECKEDOUT","element * /main/LATEST"}
 				);
-			List<string> actual = ClearCase.CatCS();
+			List<string> actual = new ClearCase(MainCCInfo).CatCS();
 
 			Assert.That(actual, Is.EquivalentTo(expected));
 		}
 
 		[Test]
-		public void ConfigSpecTest()
+		// CastCS() is tested as well.
+		public void SetBranchCSTest()
 		{
 			List<string> expected = new List<string>(new string[] {
 				"element * CHECKEDOUT"
@@ -51,102 +112,80 @@ namespace Gicc.Test
 				, "element -file * /main/LATEST -mkbranch " + BRANCH_NAME
 			});
 
-			ClearCase.SetCS(expected);
+			new ClearCase(BranchCCInfo).SetBranchCS();
 
-			Assert.That(ClearCase.CatCS(), Is.EquivalentTo(expected));
-
-			// teardown
-			ClearCase.SetDefaultCS();
-		}
-
-		[Test]
-		public void SetBranchConfigSpecTest()
-		{
-			List<string> expected = new List<string>(new string[] {
-				"element * CHECKEDOUT"
-				, "element -dir * /main/LATEST"
-				, "element -file * /main/" + BRANCH_NAME + @"/LATEST"
-				, "element -file * /main/LATEST -mkbranch " + BRANCH_NAME
-			});
-
-			ClearCase.SetBranchCS(IOHandler.BranchName);
-
-			Assert.That(ClearCase.CatCS(), Is.EquivalentTo(expected));
+			Assert.That(new ClearCase(BranchCCInfo).CatCS(), Is.EquivalentTo(expected));
 
 			// teardown
-			ClearCase.SetDefaultCS();
+			new ClearCase(BranchCCInfo).SetDefaultCS();
 		}
 
 		[Test]
 		public void CurrentViewTest()
 		{
-			Assert.AreEqual(ConfigurationManager.AppSettings["ViewName"], ClearCase.CurrentView);
+			Assert.AreEqual(ConfigurationManager.AppSettings["ViewName"], new ClearCase(BranchCCInfo).CurrentView);
 		}
 
 		[Test]
 		public void LogInUserTest()
 		{
-			Assert.AreEqual(ConfigurationManager.AppSettings["LogInUser"], ClearCase.LogInUser);
+			Assert.AreEqual(ConfigurationManager.AppSettings["LogInUser"], new ClearCase(BranchCCInfo).LogInUser);
 		}
 		
 		[Test]
 		public void LogInUserNameTest()
 		{
-            Assert.AreEqual(ConfigurationManager.AppSettings["LogInUserName"], ClearCase.LogInUserName);
+			Assert.AreEqual(ConfigurationManager.AppSettings["LogInUserName"], new ClearCase(BranchCCInfo).LogInUserName);
 		}
 
 		[Test]
 		public void CheckoutTest()
 		{
-			// setup
-			List<string> storedConfigSpec = ClearCase.CatCS();
-			ClearCase.SetBranchCS(IOHandler.BranchName);
+			ClearCase cc = new ClearCase(BranchCCInfo);
+			cc.SetBranchCS();
 
 			List<string> targetFiles = new List<string>(new string[] {"main.txt", @".\sub\main.txt"});
 			List<string> actual;
 			
-			ClearCase.Checkout(targetFiles[0]);
-			ClearCase.Checkout(targetFiles[1]);
+			cc.Checkout(targetFiles[0]);
+			cc.Checkout(targetFiles[1]);
 
-			actual = ClearCase.LscheckoutInCurrentViewByLoginUser();
+			actual = cc.LscheckoutInCurrentViewByLoginUser();
 
 			Assert.That(actual, Is.EquivalentTo(targetFiles));
 
-			ClearCase.Uncheckout(targetFiles[0]);
-			ClearCase.Uncheckout(targetFiles[1]);
+			cc.Uncheckout(targetFiles[0]);
+			cc.Uncheckout(targetFiles[1]);
 
-			actual = ClearCase.LscheckoutInCurrentViewByLoginUser();
+			actual = cc.LscheckoutInCurrentViewByLoginUser();
 			
-			Assert.That(actual, Is.EquivalentTo(new List<string>()));
-
-			// teardown
-			ClearCase.SetCS(storedConfigSpec);
+			Assert.IsTrue(actual.Count == 0);
 		}
-
-		[Test]
-		public void ExecuteTest()
-		{
-			ClearCase.Pwd();
-
-			List<string> expected = new List<string>(new string[] { IOHandler.VobPath });
-			List<string> actual = IOHandler.ReadCCout();
-
-			Assert.That(actual, Is.EquivalentTo(expected));
-		}
-
+		
 		[Test]
 		public void CheckAllSymbolicLinksAreMountedTest()
 		{
-			// setup
-			SetConfig(VOB_PATH, IOHandler.BranchName, IOHandler.RepoPath);
+			ExecutorConstructInfo VobInfo = new ExecutorConstructInfo(){
+				ExecutingPath = VOB_PATH,
+				OutPath = "giccout",
+				LogPath = "gicclog"
+			};
+			
+			ExecutorConstructInfo ParentOfVobInfo = new ExecutorConstructInfo(){
+				ExecutingPath = Path.GetDirectoryName(VOB_PATH),
+				OutPath = "giccout",
+				LogPath = "gicclog"
+			};
 
-			new ClearCase(Path.GetDirectoryName(VOB_PATH)).Mount(VOB_TAG);
-			new ClearCase(VOB_PATH).CheckAllSymbolicLinksAreMounted();
+			new ClearCase(ParentOfVobInfo).Mount(VOB_TAG);
 
-			new ClearCase(Path.GetDirectoryName(VOB_PATH)).UMount(VOB_TAG);
+			// Assert this method doesn't throw an exception
+			new ClearCase(VobInfo).CheckAllSymbolicLinksAreMounted();
+
+			new ClearCase(ParentOfVobInfo).UMount(VOB_TAG);
 			try
 			{
-				new ClearCase(VOB_PATH).CheckAllSymbolicLinksAreMounted();
+				new ClearCase(VobInfo).CheckAllSymbolicLinksAreMounted();
 			}
 			catch (GiccException ex)
 			{
@@ -156,37 +195,5 @@ namespace Gicc.Test
 
 			Assert.Fail(VOB_TAG + " 가 unmount 되었으나 유효성 검사를 통과 하였습니다.");
 		}
-	}
-
-	[TestFixture]
-	public class CCFileVersionTest : GiccTestBase
-	{
-		[Test]
-		public void ParseFmtTest()
-		{
-			CCElementVersion expected = new CCElementVersion();
-			CCElementVersion actual = new CCElementVersion();
-
-			expected.CreatedDate = DateTime.Parse("2015-05-04 15:57:38");
-			expected.EventDescription = "checkout version";
-			expected.CheckoutInfo = "reserved";
-			expected.HostName = ConfigurationManager.AppSettings["HostName"];
-			expected.ObjectKind = "version";
-			expected.ElementName = "branch1.txt";
-			expected.Version = @"\main\" + BRANCH_NAME + @"\CHECKEDOUT";
-			expected.PredecessorVersion = @"\main\" + BRANCH_NAME + @"\4";
-			expected.Operation = "checkout";
-			expected.Type = "text_file";
-			expected.OwnerLoginName = ConfigurationManager.AppSettings["LogInUserName"];
-			expected.OwnerFullName = "Park";
-
-            actual.ParseFileInfo(@"null|Attributes=|Comment=|CreatedDate=2015-05-04T15:57:38+09:00|EventDescription=checkout version|CheckoutInfo=reserved|HostName=D-SEL-00650801|IndentLevel=|Labels=|ObjectKind=version|ElementName=branch1.txt|Version=\main\" + BRANCH_NAME + @"\CHECKEDOUT|PredecessorVersion=\main\" + BRANCH_NAME
-                + @"\4|Operation=checkout|Type=text_file|SymbolicLink=|OwnerLoginName=" + ConfigurationManager.AppSettings["LogInUserName"]
-                + "|OwnerFullName=Park|HyperLink=");			
-			AssertEx.PropertyValuesAreEquals(expected, actual);
-			
-			expected.CreatedDate = DateTime.Now;
-			AssertEx.PropertyValuesAreNotEquals(expected, actual);
-		}*/
 	}
 }

@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssertEx.cs" />
+    <Compile Include="CCElementVersionTest.cs" />
     <Compile Include="ClearCaseTest.cs" />
     <Compile Include="FileEx.cs" />
     <Compile Include="GitTest.cs" />
