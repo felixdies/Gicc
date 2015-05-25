@@ -311,12 +311,14 @@ namespace Gicc.Test
 			File.WriteAllText(subtt, "A11" + nl);
 			git.AddCommit("A6", authorA, commitTime.AddMinutes(6).ToString());
 
+			// rever A6
 			git.Checkout("master");
-			File.Delete(tt);
+			File.WriteAllText(tt, "B3" + nl);
 			git.AddCommit("A7", authorA, commitTime.AddMinutes(7).ToString());
 
+			// revert A6
 			git.Checkout("master");
-			File.Delete(subtt);
+			File.WriteAllText(subtt, "A5" + nl);
 			git.AddCommit("B8", authorB, commitTime.AddMinutes(8).ToString());
 
 			Environment.CurrentDirectory = cachedCWD;

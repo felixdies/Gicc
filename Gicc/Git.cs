@@ -44,7 +44,11 @@ namespace Gicc
 			get
 			{
 				string lastPulledCommit = GetExecutedResult("show-ref --tags gicc_pull");
-				string lastGiccPullTime = GetExecutedResult("git show -s --format=%ci " + lastPulledCommit.Substring(0, 10));
+
+				if (string.IsNullOrEmpty(lastPulledCommit)) // not tagged yet
+					return new DateTime(1990, 1, 1);
+
+				string lastGiccPullTime = GetExecutedResult("show -s --format=%ai " + lastPulledCommit.Substring(0, 10));
 				return DateTime.Parse(lastGiccPullTime);
 			}
 		}

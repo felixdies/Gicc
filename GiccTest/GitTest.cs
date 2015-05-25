@@ -42,25 +42,47 @@ namespace Gicc.Test
 			CreateGitTestMockUp();
 			//setup
 
-			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 5, 0), new Git(GitMockupInfo).LastGiccPull);
+			Git gitMockup = new Git(GitMockupInfo);
+			gitMockup.TagPull();
+
+			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 8, 0), gitMockup.LastGiccPull);
 		}
 
 		[Test]
-		public void GetUntrackedFileTest()
+		public void UntrackedFileListTest()
 		{
-			List<string> expected = new List<string>(new string[] { "b", "c" });
-			List<string> actual = new Git(GitInfo).UntrackedFileList;
+			CreateGitTestMockUp();
+			File.Create(Path.Combine(REPO_MOCKUP_PATH, "untracked1")).Close();
+			File.Create(Path.Combine(REPO_MOCKUP_PATH, "untracked2")).Close();
+			//setup
+
+			List<string> expected = new string[] { "untracked1", "untracked2" }.ToList();
+			List<string> actual = new Git(GitMockupInfo).UntrackedFileList;
 
 			Assert.That(actual, Is.EquivalentTo(expected));
+
+			//cleanup
+			File.Delete(Path.Combine(REPO_MOCKUP_PATH, "untracked1"));
+			File.Delete(Path.Combine(REPO_MOCKUP_PATH, "untracked2"));
 		}
 
 		[Test]
-		public void Diff()
+		public void ModifiedFileListTest()
 		{
-			List<string> expected = new List<string>(new string[] { "a" });
-			List<string> actual = new Git(GitInfo).ModifiedFileList;
+			string TT_PATH = Path.Combine(REPO_MOCKUP_PATH, "tt.txt");
+			
+			CreateGitTestMockUp();
+			string stored = File.ReadAllText(TT_PATH);
+			File.WriteAllText(TT_PATH, "modified");
+			//setup
+
+			List<string> expected = new string[] { "tt.txt" }.ToList();
+			List<string> actual = new Git(GitMockupInfo).ModifiedFileList;
 
 			Assert.That(actual, Is.EquivalentTo(expected));
+
+			//cleanup
+			File.WriteAllText(TT_PATH, stored);
 		}
 
 		[TestCase(@".builds", true)]

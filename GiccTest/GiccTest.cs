@@ -33,7 +33,6 @@ namespace Gicc.Test
 		[Test]
 		public void CopyAndCommitTest()
 		{
-			// setup
 			CreateGitTestMockUp();
 			// setup
 
