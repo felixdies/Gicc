@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.IO;
+using System.Diagnostics;
 
 namespace Gicc
 {
@@ -255,9 +256,26 @@ namespace Gicc
 
 		protected override string Command
 		{
-			get { return "cleartool"; }
+			get {
+				ProcessStartInfo proInfo = new ProcessStartInfo()
+				{
+					WorkingDirectory = ExecutingPath,
+					FileName = "rcleartool",
+					CreateNoWindow = true,
+					UseShellExecute = false,
+				};
+
+				try
+				{
+					Process.Start(proInfo); // check if the user uses CCRC
+				}
+				catch
+				{
+					return "cleartool";
+				}
+
+				return "rcleartool";
+			}
 		}
 	}
-	
-	
 }
