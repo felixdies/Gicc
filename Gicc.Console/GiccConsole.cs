@@ -33,7 +33,17 @@ namespace Gicc.Console
 					new Gicc(Environment.CurrentDirectory, true).Push();
           break;
 
-        case "tree": case "tr":
+				case "list":
+					if (args.Length < 2)
+					{
+						WriteLine(Usage.List);
+						return;
+					}
+					new Gicc(Environment.CurrentDirectory, false).ListCCFilesOnBranch(args[1])
+						.ForEach(file => WriteLine(file));
+					break;
+
+        case "tree":
           if (args.Length < 2)
           {
             WriteLine(Usage.Tree);
@@ -42,7 +52,7 @@ namespace Gicc.Console
 					new Gicc(Environment.CurrentDirectory, false).ViewCCVersionTrees(args[1]);
           break;
 
-        case "label": case "lb":
+        case "label":
           if (args.Length < 3)
           {
             WriteLine(Usage.Label);

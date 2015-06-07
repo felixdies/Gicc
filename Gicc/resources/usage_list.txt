@@ -1,0 +1,1 @@
+﻿usage : gicc list <CC branch name>

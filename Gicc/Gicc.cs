@@ -138,8 +138,8 @@ namespace Gicc
 				{
 					BranchName = this.BranchName,
 					ExecutingPath = this.CWD,
-					OutPath = "giccout",
-					LogPath = "gicclog"
+					OutPath = Path.Combine(this.CWD, "giccout.txt"),
+					LogPath = Path.Combine(this.CWD, "gicclog.txt")
 				};
 			}
 		}
@@ -175,6 +175,14 @@ namespace Gicc
 
 		public void Push()
 		{
+		}
+
+		public List<string> ListCCFilesOnBranch(string branchName)
+		{
+			this.BranchName = branchName;
+			ClearCase cc = new ClearCase(CCInfo);
+
+			return cc.FindAllFilesInBranch();
 		}
 
 		public void ViewCCVersionTrees(string branchName)

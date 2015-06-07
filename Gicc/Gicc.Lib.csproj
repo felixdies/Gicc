@@ -66,6 +66,9 @@
   <ItemGroup>
     <EmbeddedResource Include="resources\usage_label.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\usage_list.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

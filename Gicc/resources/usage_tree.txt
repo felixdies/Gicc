@@ -1,1 +1,1 @@
-﻿usage : gicc tree|tr <CC branch name>
+﻿usage : gicc tree <CC branch name>

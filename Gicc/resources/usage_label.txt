@@ -1,1 +1,1 @@
-﻿usage : gicc label|lb <CC branch name> <CC label>
+﻿usage : gicc label <CC branch name> <CC label>
