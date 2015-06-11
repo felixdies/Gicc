@@ -58,13 +58,13 @@ namespace Gicc
 
 		protected string GetExecutedResult(string arg)
 		{
-			Execute(arg + " > " + OutPath);
+			Execute(arg + " > '" + OutPath + "'");
 			return File.ReadAllText(OutPath);
 		}
 
 		protected List<string> GetExecutedResultList(string arg)
 		{
-			Execute(arg + " > " + OutPath);
+			Execute(arg + " > '" + OutPath + "'");
 			return File.ReadAllLines(OutPath).ToList();
 		}
 	}
