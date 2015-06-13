@@ -85,28 +85,37 @@ namespace Gicc.Test
 			File.WriteAllText(TT_PATH, stored);
 		}
 
-		[TestCase(@".builds", true)]
-		[TestCase(@"0.suo", true)]
-		[TestCase(@"0.sln.docstates", true)]
-		[TestCase(@"0.ide\0", true)]
-		[TestCase(@"0.sln.ide\0", true)]
-		[TestCase(@"debug\0", true)]
-		[TestCase(@"Debug\0", true)]
-		[TestCase(@"x86\0", true)]
-		[TestCase(@"testresult\0", true)]
-		[TestCase(@"testresult1\0", true)]
-		[TestCase(@"testResult\0", true)]
-		[TestCase(@"Testresult1\0", true)]
-		[TestCase(@"file", false)]
-		[TestCase(@"dir\0", false)]
-		public void IsGitIgnoredTest(string path, bool result)
+		[Test]
+		public void IsGitIgnoredTest()
 		{
 			//setup
-			new Git(GitInfo).Init();
+			Git git = new Git(GitInfo);
+			git.Init();
 			File.WriteAllText(Path.Combine(REPO_PATH, ".gitignore"), ResourceHandler.GetResource("gitignore.txt"));
 			//setup
 
-			Assert.AreEqual(new Git(GitInfo).IsIgnored(path), result);
+			Dictionary<string, bool> ignoredList = new Dictionary<string, bool>()
+			{
+				{@".builds", true},
+				{@"0.suo", true},
+				{@"0.sln.docstates", true},
+				{@"0.ide\0", true},
+				{@"0.sln.ide\0", true},
+				{@"debug\0", true},
+				{@"Debug\0", true},
+				{@"x86\0", true},
+				{@"testresult\0", true},
+				{@"testresult1\0", true},
+				{@"testResult\0", true},
+				{@"Testresult1\0", true},
+				{@"file", false},
+				{@"dir\0", false}
+			};
+
+			foreach (KeyValuePair<string, bool> pair in ignoredList)
+			{
+				Assert.AreEqual(git.IsIgnored(pair.Key), pair.Value);
+			}
 		}
 	}
 }

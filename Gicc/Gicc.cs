@@ -199,11 +199,16 @@ namespace Gicc
 
 			this.BranchName = branchName;
 			ClearCase cc = new ClearCase(CCInfo);
-			List<string> targetExtension = new List<string>(new string[] { ".aspx", ".ascx", ".js", ".sql" });
 
 			cc.FindAllFilesInBranch()
-				.Where(filePath => targetExtension.Contains(Path.GetExtension(filePath))).ToList()
+				.Where(filePath => IsTargetExtension(filePath)).ToList()
 				.ForEach(filePath => cc.LabelLatestMain(filePath, label));
+		}
+
+		internal bool IsTargetExtension(string filePath)
+		{
+			List<string> targetExtension = new List<string>(new string[] { ".aspx", ".ascx", ".js", ".sql" });
+			return targetExtension.Contains(Path.GetExtension(filePath.Split('@')[0]));
 		}
 
 		/// <summary>

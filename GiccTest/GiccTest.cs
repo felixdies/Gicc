@@ -63,5 +63,22 @@ namespace Gicc.Test
 
 			Assert.AreEqual(expected, actual);
 		}
+
+		[TestCase(@"test.aspx@@/main/5", true)]
+		[TestCase(@"test.ascx@@/main/5", true)]
+		[TestCase(@"test.js@@/main/5", true)]
+		[TestCase(@"test.sql@@/main/5", true)]
+		[TestCase(@"test.cs@@/main/5", false)]
+		[TestCase(@"test.aspx", true)]
+		[TestCase(@"test.ascx", true)]
+		[TestCase(@"test.js", true)]
+		[TestCase(@"test.sql", true)]
+		[TestCase(@"test.cs", false)]
+		public void IsTargetExtensionTest(string path, bool result)
+		{
+			Gicc gicc = new Gicc(REPO_PATH, false);
+
+			Assert.AreEqual(result, gicc.IsTargetExtension(path));
+		}
 	}
 }
