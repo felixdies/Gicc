@@ -78,7 +78,7 @@ namespace Gicc.Test
 		{
 			Gicc gicc = new Gicc(REPO_PATH, false);
 
-			Assert.AreEqual(result, gicc.IsTargetExtension(path));
+			Assert.AreEqual(result, gicc.IsLabelingTargetExtension(path));
 		}
 	}
 }

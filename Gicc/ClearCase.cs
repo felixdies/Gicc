@@ -175,9 +175,9 @@ namespace Gicc
 			Execute("lsvtree -graphical " + filePath + "\\LATEST", false);
     }
 
-    public void LabelLatestMain(string filePath, string label)
+    public void LabelLatestElement(string filePath, string branch, string label)
     {
-			Execute("mklabel -replace -version \\main\\LATEST " + label + " " + filePath, false);
+			Execute("mklabel -replace -version \\" + branch + "\\LATEST " + label + " " + filePath, false);
     }
 
 		internal List<CCElementVersion> FindAllSymbolicLinks()

@@ -1,1 +1,5 @@
-﻿usage : gicc label <CC branch name> <CC label>
+﻿usage : gicc label <labeling target> <CC branch name> <CC label>
+
+<labeling target>
+-main[m] : 메인 브랜치의 마지막 파일
+-branch[b] : 대상 브랜치의 마지막 파일

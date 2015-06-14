@@ -53,18 +53,43 @@ namespace Gicc.Console
           break;
 
         case "label":
-          if (args.Length < 3)
-          {
-            WriteLine(Usage.Label);
-            return;
-          }
-          new Gicc(Environment.CurrentDirectory, false).MakeCCLabel(args[1], args[2]);
+					Label(args);
           break;
 
         default:
           WriteLine(Usage.Main);
           return;
       }
+		}
+
+		static private void Label(string[] args)
+		{
+			if (args.Length < 4)
+			{
+				WriteLine(Usage.Label);
+				return;
+			}
+
+			string labeledBranch;
+
+			switch (args[1].ToLower())
+			{
+				case "-main":
+				case "-m":
+					labeledBranch = "main";
+					break;
+				
+				case "-branch":
+				case "-b":
+					labeledBranch = "main\\" + args[2];
+					break;
+
+				default:
+					WriteLine(Usage.Label);
+					return;
+			}
+
+			new Gicc(Environment.CurrentDirectory, false).LabelLastElements(args[2], labeledBranch, args[3]);
 		}
 
     static void WriteLine(string value)

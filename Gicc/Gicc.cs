@@ -193,19 +193,19 @@ namespace Gicc
 			cc.FindAllFilesInBranch().ForEach(filePath => cc.ViewVersionTree(filePath));
 		}
 
-		public void MakeCCLabel(string branchName, string label)
+		public void LabelLastElements(string searchedBranch, string labeledBranch, string label)
 		{
 			// todo: validate label
 
-			this.BranchName = branchName;
+			this.BranchName = searchedBranch;
 			ClearCase cc = new ClearCase(CCInfo);
 
 			cc.FindAllFilesInBranch()
-				.Where(filePath => IsTargetExtension(filePath)).ToList()
-				.ForEach(filePath => cc.LabelLatestMain(filePath, label));
+				.Where(filePath => IsLabelingTargetExtension(filePath)).ToList()
+				.ForEach(filePath => cc.LabelLatestElement(filePath, labeledBranch, label));
 		}
 
-		internal bool IsTargetExtension(string filePath)
+		internal bool IsLabelingTargetExtension(string filePath)
 		{
 			List<string> targetExtension = new List<string>(new string[] { ".aspx", ".ascx", ".js", ".sql" });
 			return targetExtension.Contains(Path.GetExtension(filePath.Split('@')[0]));
