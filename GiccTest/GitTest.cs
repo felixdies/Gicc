@@ -112,10 +112,16 @@ namespace Gicc.Test
 				{@"dir\0", false}
 			};
 
+			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
+			Console.WriteLine("start IsGitIgnoredTest()");
+			sw.Start();
 			foreach (KeyValuePair<string, bool> pair in ignoredList)
 			{
 				Assert.AreEqual(git.IsIgnored(pair.Key), pair.Value);
 			}
+			sw.Stop();
+			Console.WriteLine("end IsGitIgnoredTest(). Elapsed time : " + sw.Elapsed);
 		}
 	}
 }

@@ -67,5 +67,40 @@ namespace Gicc
 			Execute(arg + " > '" + OutPath + "'");
 			return File.ReadAllLines(OutPath).ToList();
 		}
+
+		/// <summary>
+		/// 성능상 문제가 있을 때에만 사용.
+		/// </summary>
+		/// <param name="arg"></param>
+		/// <returns></returns>
+		internal protected string GetExecutedResultWithOutFIO(string arg)
+		{
+			Process proc = new Process();
+			ProcessStartInfo proInfo = new ProcessStartInfo()
+			{
+				WorkingDirectory = ExecutingPath,
+				FileName = @"powershell",
+				Arguments = Command + " " + arg,
+				CreateNoWindow = true,
+				UseShellExecute = false,
+				RedirectStandardOutput = true,
+				RedirectStandardError = true
+			};
+			
+			proc.StartInfo = proInfo;
+			proc.Start();
+
+			using (StreamReader errReader = proc.StandardError)
+			{
+				string err = errReader.ReadToEnd(); // wait for exit
+				if (!string.IsNullOrWhiteSpace(err))
+				{
+					new Logger(LogPath).Write(err);
+					throw new Exception(err);
+				}
+			}
+
+			return proc.StandardOutput.ReadToEnd();
+		}
 	}
 }

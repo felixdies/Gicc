@@ -48,6 +48,7 @@
     <Compile Include="AssertEx.cs" />
     <Compile Include="CCElementVersionTest.cs" />
     <Compile Include="ClearCaseTest.cs" />
+    <Compile Include="ExecutorTest.cs" />
     <Compile Include="FileEx.cs" />
     <Compile Include="GitTest.cs" />
     <Compile Include="GiccTestBase.cs" />

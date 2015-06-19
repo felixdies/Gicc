@@ -109,7 +109,8 @@ namespace Gicc
 
 		internal bool IsIgnored(string fileName)
 		{
-			return GetExecutedResultList("check-ignore " + fileName).Count > 0;
+			// git print ignored file
+			return !string.IsNullOrEmpty(GetExecutedResultWithOutFIO("check-ignore " + fileName));
 		}
 
 		internal void Checkout(string branch)
