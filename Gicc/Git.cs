@@ -107,10 +107,13 @@ namespace Gicc
 			Execute("tag -f gicc_pull");
 		}
 
-		internal bool IsIgnored(string fileName)
+		internal List<bool> IsIgnoredList(List<string> fileNameList)
 		{
-			// git print ignored file
-			return !string.IsNullOrEmpty(GetExecutedResultWithOutFIO("check-ignore " + fileName));
+			List<string> argList = fileNameList.Select(filename => "check-ignore " + filename).ToList();
+			List<string> ExecuteResultList = GetExecutedResultListWithoutFIO(argList);
+			
+			// result is not empty if the file is ignored
+			return ExecuteResultList.Select(result => !string.IsNullOrWhiteSpace(result)).ToList();
 		}
 
 		internal void Checkout(string branch)

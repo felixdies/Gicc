@@ -260,8 +260,8 @@ namespace Gicc
 
 			foreach (string relativeFilePath in mainFileList)
 			{
-				if (!git.IsIgnored(relativeFilePath))
-					File.Copy(Path.Combine(VobPath, relativeFilePath), Path.Combine(RepoPath, relativeFilePath), true);
+				//if (!git.IsIgnored(relativeFilePath))
+					//File.Copy(Path.Combine(VobPath, relativeFilePath), Path.Combine(RepoPath, relativeFilePath), true);
 			}
 		}
 

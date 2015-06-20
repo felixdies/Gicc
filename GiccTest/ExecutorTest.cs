@@ -14,22 +14,23 @@ namespace Gicc.Test
 	{
 		[Test]
 		/// Performance test - result : 0.5 sec per each process execution
-		public void GetExecutedResultWithOutFIOTest()
+		public void GetExecutedResultListWithoutFIOTest()
 		{
 			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 			Console.WriteLine("start GetExecutedResultWithOutFIO()");
 			sw.Start();
 
-			for (int i = 0; i < 10; i++)
-			{
-				try
-				{
-					new Git(GitInfo).GetExecutedResultWithOutFIO("git");
-				}
-				catch { }
-			}
+			Git git = new Git(GitInfo);
+
+			List<string> argList = new string[] { "", "help" }.ToList();
+			List<string> expected = new string[] { "usage", "usage" }.ToList();
+			List<string> actual = git.GetExecutedResultListWithoutFIO(argList);
 
 			sw.Stop();
+
+			for (int i = 0; i < expected.Count; i++)
+				Assert.That(actual[i].StartsWith(expected[i]));
+
 			Console.WriteLine("end GetExecutedResultWithOutFIO(). Elapsed time : " + sw.Elapsed);
 		}
 	}

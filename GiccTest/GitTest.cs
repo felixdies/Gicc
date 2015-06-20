@@ -86,7 +86,7 @@ namespace Gicc.Test
 		}
 
 		[Test]
-		public void IsGitIgnoredTest()
+		public void IsIgnoredListTest()
 		{
 			//setup
 			Git git = new Git(GitInfo);
@@ -116,10 +116,18 @@ namespace Gicc.Test
 
 			Console.WriteLine("start IsGitIgnoredTest()");
 			sw.Start();
+
+			List<string> fileNameList = new List<string>();
+			List<bool> isIgnoredList = new List<bool>();
+
 			foreach (KeyValuePair<string, bool> pair in ignoredList)
 			{
-				Assert.AreEqual(git.IsIgnored(pair.Key), pair.Value);
+				fileNameList.Add(pair.Key);
+				isIgnoredList.Add(pair.Value);
 			}
+
+			Assert.That(git.IsIgnoredList(fileNameList), Is.EquivalentTo(isIgnoredList));
+
 			sw.Stop();
 			Console.WriteLine("end IsGitIgnoredTest(). Elapsed time : " + sw.Elapsed);
 		}

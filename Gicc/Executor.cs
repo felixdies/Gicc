@@ -94,19 +94,38 @@ namespace Gicc
 			StreamWriter inputWriter = proc.StandardInput;
 			inputWriter.AutoFlush = true;
 
-			proc.ErrorDataReceived +=
-				(sender, e) =>
-				{
-					new Logger(LogPath).Write(e.Data);
-					throw new GiccException(e.Data);
-				};
-
 			foreach (string arg in argList)
-				inputWriter.WriteLine(arg);
-
+				inputWriter.WriteLine(Command + " " + arg);
 			inputWriter.WriteLine("exit");
 
+			string err = proc.StandardError.ReadToEnd();
+			if (!string.IsNullOrWhiteSpace(err))
+			{
+				new Logger(LogPath).Write(err);
+				throw new GiccException("명령을 수행하던 중 오류가 발생 하였습니다.");
+			}
+
 			return proc.StandardOutput.ReadToEnd();
+		}
+
+		internal protected List<string> GetExecutedResultListWithoutFIO(List<string> argList)
+		{
+			string executedResult = GetExecutedResultWithoutFIO(argList);
+			string[] resultLines = executedResult.Split(Environment.NewLine.ToCharArray());
+
+			List<string> resultList = Enumerable.Repeat("", argList.Count).ToList();
+
+			int index = -1;
+			foreach (string line in resultLines)
+			{
+				if (line.StartsWith(ExecutingPath + ">")) { index++; continue; }
+				if (string.IsNullOrWhiteSpace(line)) continue;
+				if (index < 0) continue;
+
+				resultList[index] += line + Environment.NewLine;
+			}
+
+			return resultList.Select(result => result.Trim()).ToList();
 		}
 	}
 }
