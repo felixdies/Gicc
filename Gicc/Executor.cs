@@ -73,34 +73,50 @@ namespace Gicc
 		/// </summary>
 		/// <param name="arg"></param>
 		/// <returns></returns>
-		internal protected string GetExecutedResultWithOutFIO(string arg)
+		internal protected List<string> GetExecutedResultListWithOutFIO(List<string> argList)
 		{
-			Process proc = new Process();
-			ProcessStartInfo proInfo = new ProcessStartInfo()
+			List<string> resultOutputList = new List<string>();
+
+			ProcessStartInfo proInfo = new ProcessStartInfo("cmd")
 			{
 				WorkingDirectory = ExecutingPath,
-				FileName = @"powershell",
-				Arguments = Command + " " + arg,
-				CreateNoWindow = true,
+				CreateNoWindow = false,
 				UseShellExecute = false,
+				RedirectStandardInput = true,
 				RedirectStandardOutput = true,
 				RedirectStandardError = true
 			};
-			
+
+			Process proc = new Process();
 			proc.StartInfo = proInfo;
 			proc.Start();
 
-			using (StreamReader errReader = proc.StandardError)
+			StreamWriter inputWriter = proc.StandardInput;
+			List<string> outputList = new List<string>();
+			string errorMessage = string.Empty;
+			
+			inputWriter.AutoFlush = true;
+
+			proc.OutputDataReceived += (sender, e) => outputList.Add(e.Data);
+			proc.BeginOutputReadLine();
+
+			proc.ErrorDataReceived += (sender, e) => errorMessage += e.Data + Environment.NewLine;
+			proc.BeginErrorReadLine();
+
+			for (int i = 0; i < argList.Count; i++)
 			{
-				string err = errReader.ReadToEnd(); // wait for exit
-				if (!string.IsNullOrWhiteSpace(err))
-				{
-					new Logger(LogPath).Write(err);
-					throw new Exception(err);
-				}
+				inputWriter.WriteLine(argList[i]);
+				Console.WriteLine("errorMessage : " + errorMessage);
+				Console.WriteLine("output : ");
+				outputList.ForEach(output => Console.WriteLine(output));
 			}
 
-			return proc.StandardOutput.ReadToEnd();
+			resultOutputList = outputList;
+
+			proc.CloseMainWindow();
+			proc.Close();
+
+			return resultOutputList;
 		}
 	}
 }
