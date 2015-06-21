@@ -92,29 +92,33 @@ namespace Gicc
 			proc.Start();
 
 			StreamWriter inputWriter = proc.StandardInput;
-			List<string> outputList = new List<string>();
-			string errorMessage = string.Empty;
-			
 			inputWriter.AutoFlush = true;
 
-			proc.OutputDataReceived += (sender, e) => outputList.Add(e.Data);
-			proc.BeginOutputReadLine();
+			StreamReader errReader = proc.StandardError;
 
-			proc.ErrorDataReceived += (sender, e) => errorMessage += e.Data + Environment.NewLine;
-			proc.BeginErrorReadLine();
-
-			for (int i = 0; i < argList.Count; i++)
+			foreach (string arg in argList)
 			{
-				inputWriter.WriteLine(argList[i]);
-				Console.WriteLine("errorMessage : " + errorMessage);
-				Console.WriteLine("output : ");
-				outputList.ForEach(output => Console.WriteLine(output));
+				errReader.DiscardBufferedData();
+				inputWriter.WriteLine(arg);
+
+				// error check
+				string errMsg = string.Empty;
+
+				while (errReader.Peek() > -1)
+					errMsg += errReader.ReadLine();
+
+				if (!string.IsNullOrWhiteSpace(errMsg))
+				{
+					new Logger(LogPath).Write(errMsg);
+					throw new Exception(errMsg);
+				}
 			}
 
-			resultOutputList = outputList;
+			string line = string.Empty;
+			while((line = proc.StandardOutput.ReadLine()) != null)
+				resultOutputList.Add(line);
 
 			proc.CloseMainWindow();
-			proc.Close();
 
 			return resultOutputList;
 		}
