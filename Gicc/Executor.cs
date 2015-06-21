@@ -73,7 +73,7 @@ namespace Gicc
 		/// </summary>
 		/// <param name="arg"></param>
 		/// <returns></returns>
-		internal protected List<string> GetExecutedResultListWithOutFIO(List<string> argList)
+		internal protected string GetExecutedResultWithoutFIO(List<string> argList)
 		{
 			List<string> resultOutputList = new List<string>();
 
@@ -94,33 +94,19 @@ namespace Gicc
 			StreamWriter inputWriter = proc.StandardInput;
 			inputWriter.AutoFlush = true;
 
-			StreamReader errReader = proc.StandardError;
+			proc.ErrorDataReceived +=
+				(sender, e) =>
+				{
+					new Logger(LogPath).Write(e.Data);
+					throw new GiccException(e.Data);
+				};
 
 			foreach (string arg in argList)
-			{
-				errReader.DiscardBufferedData();
 				inputWriter.WriteLine(arg);
 
-				// error check
-				string errMsg = string.Empty;
+			inputWriter.WriteLine("exit");
 
-				while (errReader.Peek() > -1)
-					errMsg += errReader.ReadLine();
-
-				if (!string.IsNullOrWhiteSpace(errMsg))
-				{
-					new Logger(LogPath).Write(errMsg);
-					throw new Exception(errMsg);
-				}
-			}
-
-			string line = string.Empty;
-			while((line = proc.StandardOutput.ReadLine()) != null)
-				resultOutputList.Add(line);
-
-			proc.CloseMainWindow();
-
-			return resultOutputList;
+			return proc.StandardOutput.ReadToEnd();
 		}
 	}
 }
