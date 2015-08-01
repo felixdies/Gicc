@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Gicc
 {
-	public class GitConstructInfo : ExecutorConstructInfo
-	{
-		internal string RepoPath { get; set; }
-	}
+  public class GitConstructInfo : ExecutorConstructInfo
+  {
+    internal string RepoPath { get; set; }
+  }
 }

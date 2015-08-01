@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Gicc
 {
-	public class ClearCaseConstructInfo : ExecutorConstructInfo
-	{
-		public string VobPath { get; set; }
-	}
+  public class ClearCaseConstructInfo : ExecutorConstructInfo
+  {
+    public string VobPath { get; set; }
+  }
 }

@@ -91,7 +91,8 @@ namespace Gicc.Test
 			//setup
 			Git git = new Git(GitInfo);
 			git.Init();
-			File.WriteAllText(Path.Combine(REPO_PATH, ".gitignore"), ResourceHandler.GetResource("gitignore.txt"));
+      throw new NotImplementedException();
+      //File.WriteAllText(Path.Combine(REPO_PATH, ".gitignore"), ResourceHandler.GetResource("gitignore.txt"));
 			//setup
 
 			Dictionary<string, bool> ignoredList = new Dictionary<string, bool>()

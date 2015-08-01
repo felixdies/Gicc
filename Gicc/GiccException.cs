@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace Gicc
 {
-	public class GiccException : Exception
-	{
-		public GiccException()
-		{
-		}
+  public class GiccException : Exception
+  {
+    public GiccException()
+    {
+    }
 
-		public GiccException(string message) : base(message)
-		{
-		}
-	}
+    public GiccException(string message)
+      : base(message)
+    {
+    }
+  }
 }

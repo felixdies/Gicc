@@ -9,15 +9,17 @@ using Gicc;
 
 namespace Gicc.Console
 {
-	public class GiccConsole
-	{
-		static void Main(string[] args)
-		{
+  public class GiccConsole
+  {
+    static void Main(string[] args)
+    {
       if (args.Length == 0)
       {
         WriteLine(Usage.Main);
         return;
       }
+
+      ClearCase cc;
 
       switch (args[0].ToLower())
       {
@@ -26,22 +28,22 @@ namespace Gicc.Console
           break;
 
         case "pull":
-					new Gicc(Environment.CurrentDirectory, true).Pull();
+          new Gicc(Environment.CurrentDirectory, true).Pull();
           break;
 
         case "push":
-					new Gicc(Environment.CurrentDirectory, true).Push();
+          new Gicc(Environment.CurrentDirectory, true).Push();
           break;
 
-				case "list":
-					if (args.Length < 2)
-					{
-						WriteLine(Usage.List);
-						return;
-					}
-					new Gicc(Environment.CurrentDirectory, false).ListCCFilesOnBranch(args[1])
-						.ForEach(file => WriteLine(file));
-					break;
+        case "list":
+          if (args.Length < 2)
+          {
+            WriteLine(Usage.List);
+            return;
+          }
+          cc = new ClearCase(CreateCCInfo(args[1], Environment.CurrentDirectory));
+          cc.FindAllFilesInBranch().ForEach(file => WriteLine(file));
+          break;
 
         case "tree":
           if (args.Length < 2)
@@ -49,52 +51,89 @@ namespace Gicc.Console
             WriteLine(Usage.Tree);
             return;
           }
-					new Gicc(Environment.CurrentDirectory, false).ViewCCVersionTrees(args[1]);
+          cc = new ClearCase(CreateCCInfo(args[1], Environment.CurrentDirectory));
+          cc.FindAllFilesInBranch().ForEach(filePath => cc.ViewVersionTree(filePath));
           break;
 
         case "label":
-					Label(args);
+          Label(args);
+          break;
+
+        case "cs":
+          ConfigSpec(args);
           break;
 
         default:
           WriteLine(Usage.Main);
           return;
       }
-		}
+    }
 
-		static private void Label(string[] args)
-		{
-			if (args.Length < 4)
-			{
-				WriteLine(Usage.Label);
-				return;
-			}
+    static private void Label(string[] args)
+    {
+      if (args.Length < 4)
+      {
+        WriteLine(Usage.Label);
+        return;
+      }
 
-			string labeledBranch;
+      string labeledBranch;
 
-			switch (args[1].ToLower())
-			{
-				case "-main":
-				case "-m":
-					labeledBranch = "main";
-					break;
-				
-				case "-branch":
-				case "-b":
-					labeledBranch = "main\\" + args[2];
-					break;
+      switch (args[1].ToLower())
+      {
+        case "-main": case "-m":
+          labeledBranch = "main";
+          break;
 
-				default:
-					WriteLine(Usage.Label);
-					return;
-			}
+        case "-branch": case "-b":
+          labeledBranch = "main\\" + args[2];
+          break;
 
-			new Gicc(Environment.CurrentDirectory, false).LabelLastElements(args[2], labeledBranch, args[3]);
-		}
+        default:
+          WriteLine(Usage.Label);
+          return;
+      }
+
+      ClearCase cc = new ClearCase(CreateCCInfo(labeledBranch, Environment.CurrentDirectory));
+      cc.LabelLastElements(labeledBranch, args[3]);
+    }
+
+    static private void ConfigSpec(string[] args)
+    {
+      switch (args.Length)
+      {
+        case 2:
+          new ClearCase(CreateCCInfo("", Environment.CurrentDirectory)).CatCS()
+            .ForEach(line => WriteLine(line));
+          break;
+        /*
+        case 3:
+          new Gicc(Environment.CurrentDirectory, args[2]).SetBranchCS();
+          break;
+        */
+        default:
+          WriteLine(Usage.CS);
+          return;
+      }
+    }
+
+    /// <summary>
+    /// Git 과 상관 없이 CC 를 실행 할 때 사용하는 생성자 정보
+    /// </summary>
+    static private ClearCaseConstructInfo CreateCCInfo(string branchName, string executingPath)
+    {
+      return new ClearCaseConstructInfo()
+      {
+        BranchName = branchName,
+        ExecutingPath = executingPath,
+        OutPath = Path.Combine(executingPath, "giccout.txt"),
+        LogPath = Path.Combine(executingPath, "gicclog.txt")
+      };
+    }
 
     static void WriteLine(string value)
     {
       System.Console.WriteLine(value);
     }
-	}
+  }
 }

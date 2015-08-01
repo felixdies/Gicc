@@ -1,0 +1,5 @@
+﻿usage : cc cs [<branch name>]
+
+<branch name>
+-(구현 안됨!!)입력 하는 경우, 해당 branch 의 config spec 을 CC 에 설정 합니다.
+-입력 하지 않는 경우, 현재 config spec 을 보여 줍니다.

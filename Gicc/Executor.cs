@@ -9,123 +9,123 @@ using System.Diagnostics;
 
 namespace Gicc
 {
-	abstract class Executor
-	{
-		public Executor(ExecutorConstructInfo constructInfo)
-		{
-			this.BranchName = constructInfo.BranchName;
+  public abstract class Executor
+  {
+    public Executor(ExecutorConstructInfo constructInfo)
+    {
+      this.BranchName = constructInfo.BranchName;
 
-			this.ExecutingPath = constructInfo.ExecutingPath;
-			this.OutPath = constructInfo.OutPath;
-			this.LogPath = constructInfo.LogPath;
-		}
+      this.ExecutingPath = constructInfo.ExecutingPath;
+      this.OutPath = constructInfo.OutPath;
+      this.LogPath = constructInfo.LogPath;
+    }
 
-		internal string BranchName { get; set; }
-		
-		protected string ExecutingPath { get; set; }
-		protected string OutPath { get; set; }
-		protected string LogPath { get; set; }
-		
-		protected abstract string Command { get; }
+    internal string BranchName { get; set; }
 
-		protected void Execute(string arg, bool wait = true)
-		{
-			Process proc = new Process();
-			ProcessStartInfo proInfo = new ProcessStartInfo()
-			{
-				WorkingDirectory = ExecutingPath,
-				FileName = @"powershell",
-				Arguments = Command + " " + arg,
-				CreateNoWindow = true,
-				UseShellExecute = false,
-				RedirectStandardError = true
-			};
+    protected string ExecutingPath { get; set; }
+    protected string OutPath { get; set; }
+    protected string LogPath { get; set; }
 
-			proc.StartInfo = proInfo;
-			proc.Start();
-			new Logger(LogPath).WriteCommand(proInfo.Arguments, DateTime.Now);
+    protected abstract string Command { get; }
 
-			if (wait)
-			{
-				using (StreamReader errReader = proc.StandardError)
-				{
-					string err = errReader.ReadToEnd(); // wait for exit
-					if (!string.IsNullOrWhiteSpace(err))
-						new Logger(LogPath).Write(err);
-				}
-			}
-		}
+    protected void Execute(string arg, bool wait = true)
+    {
+      Process proc = new Process();
+      ProcessStartInfo proInfo = new ProcessStartInfo()
+      {
+        WorkingDirectory = ExecutingPath,
+        FileName = @"powershell",
+        Arguments = Command + " " + arg,
+        CreateNoWindow = true,
+        UseShellExecute = false,
+        RedirectStandardError = true
+      };
 
-		protected string GetExecutedResult(string arg)
-		{
-			Execute(arg + " > '" + OutPath + "'");
-			return File.ReadAllText(OutPath);
-		}
+      proc.StartInfo = proInfo;
+      proc.Start();
+      new Logger(LogPath).WriteCommand(proInfo.Arguments, DateTime.Now);
 
-		protected List<string> GetExecutedResultList(string arg)
-		{
-			Execute(arg + " > '" + OutPath + "'");
-			return File.ReadAllLines(OutPath).ToList();
-		}
+      if (wait)
+      {
+        using (StreamReader errReader = proc.StandardError)
+        {
+          string err = errReader.ReadToEnd(); // wait for exit
+          if (!string.IsNullOrWhiteSpace(err))
+            new Logger(LogPath).Write(err);
+        }
+      }
+    }
 
-		/// <summary>
-		/// 성능상 문제가 있을 때에만 사용.
-		/// </summary>
-		/// <param name="arg"></param>
-		/// <returns></returns>
-		internal protected string GetExecutedResultWithoutFIO(List<string> argList)
-		{
-			List<string> resultOutputList = new List<string>();
+    protected string GetExecutedResult(string arg)
+    {
+      Execute(arg + " > '" + OutPath + "'");
+      return File.ReadAllText(OutPath);
+    }
 
-			ProcessStartInfo proInfo = new ProcessStartInfo("cmd")
-			{
-				WorkingDirectory = ExecutingPath,
-				CreateNoWindow = false,
-				UseShellExecute = false,
-				RedirectStandardInput = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true
-			};
+    protected List<string> GetExecutedResultList(string arg)
+    {
+      Execute(arg + " > '" + OutPath + "'");
+      return File.ReadAllLines(OutPath).ToList();
+    }
 
-			Process proc = new Process();
-			proc.StartInfo = proInfo;
-			proc.Start();
+    /// <summary>
+    /// 성능상 문제가 있을 때에만 사용.
+    /// </summary>
+    /// <param name="arg"></param>
+    /// <returns></returns>
+    internal protected string GetExecutedResultWithoutFIO(List<string> argList)
+    {
+      List<string> resultOutputList = new List<string>();
 
-			StreamWriter inputWriter = proc.StandardInput;
-			inputWriter.AutoFlush = true;
+      ProcessStartInfo proInfo = new ProcessStartInfo("cmd")
+      {
+        WorkingDirectory = ExecutingPath,
+        CreateNoWindow = false,
+        UseShellExecute = false,
+        RedirectStandardInput = true,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true
+      };
 
-			foreach (string arg in argList)
-				inputWriter.WriteLine(Command + " " + arg);
-			inputWriter.WriteLine("exit");
+      Process proc = new Process();
+      proc.StartInfo = proInfo;
+      proc.Start();
 
-			string err = proc.StandardError.ReadToEnd();
-			if (!string.IsNullOrWhiteSpace(err))
-			{
-				new Logger(LogPath).Write(err);
-				throw new GiccException("명령을 수행하던 중 오류가 발생 하였습니다.");
-			}
+      StreamWriter inputWriter = proc.StandardInput;
+      inputWriter.AutoFlush = true;
 
-			return proc.StandardOutput.ReadToEnd();
-		}
+      foreach (string arg in argList)
+        inputWriter.WriteLine(Command + " " + arg);
+      inputWriter.WriteLine("exit");
 
-		internal protected List<string> GetExecutedResultListWithoutFIO(List<string> argList)
-		{
-			string executedResult = GetExecutedResultWithoutFIO(argList);
-			string[] resultLines = executedResult.Split(Environment.NewLine.ToCharArray());
+      string err = proc.StandardError.ReadToEnd();
+      if (!string.IsNullOrWhiteSpace(err))
+      {
+        new Logger(LogPath).Write(err);
+        throw new GiccException("명령을 수행하던 중 오류가 발생 하였습니다.");
+      }
 
-			List<string> resultList = Enumerable.Repeat("", argList.Count).ToList();
+      return proc.StandardOutput.ReadToEnd();
+    }
 
-			int index = -1;
-			foreach (string line in resultLines)
-			{
-				if (line.StartsWith(ExecutingPath + ">")) { index++; continue; }
-				if (string.IsNullOrWhiteSpace(line)) continue;
-				if (index < 0) continue;
+    internal protected List<string> GetExecutedResultListWithoutFIO(List<string> argList)
+    {
+      string executedResult = GetExecutedResultWithoutFIO(argList);
+      string[] resultLines = executedResult.Split(Environment.NewLine.ToCharArray());
 
-				resultList[index] += line + Environment.NewLine;
-			}
+      List<string> resultList = Enumerable.Repeat("", argList.Count).ToList();
 
-			return resultList.Select(result => result.Trim()).ToList();
-		}
-	}
+      int index = -1;
+      foreach (string line in resultLines)
+      {
+        if (line.StartsWith(ExecutingPath + ">")) { index++; continue; }
+        if (string.IsNullOrWhiteSpace(line)) continue;
+        if (index < 0) continue;
+
+        resultList[index] += line + Environment.NewLine;
+      }
+
+      return resultList.Select(result => result.Trim()).ToList();
+    }
+  }
 }

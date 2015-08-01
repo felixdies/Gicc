@@ -54,7 +54,6 @@
     <Compile Include="GiccTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GiccTest.cs" />
-    <Compile Include="ResourceHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Gicc\Gicc.Lib.csproj">
