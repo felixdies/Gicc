@@ -9,30 +9,30 @@ using System.IO;
 
 namespace Gicc
 {
-  public class Usage
+  public class Resource
   {
-    public static string Main
+    public static string USAGE_MAIN
     { get { return GetResource("usage_main.txt"); } }
 
-    public static string Clone
+    public static string USAGE_CLONE
     { get { return GetResource("usage_clone.txt"); } }
 
-    public static string Pull
+    public static string USAGE_PULL
     { get { return GetResource("usage_pull.txt"); } }
 
-    public static string Push
+    public static string USAGE_PUSH
     { get { return GetResource("usage_push.txt"); } }
 
-    public static string List
+    public static string USAGE_LIST
     { get { return GetResource("usage_list.txt"); } }
 
-    public static string Tree
+    public static string USAGE_TREE
     { get { return GetResource("usage_tree.txt"); } }
 
-    public static string Label
+    public static string USAGE_LABEL
     { get { return GetResource("usage_label.txt"); } }
 
-    public static string CS
+    public static string USAGE_CS
     { get { return GetResource("usage_cs.txt"); } }
 
     /// <summary>
@@ -40,7 +40,7 @@ namespace Gicc
     /// 이 메서드는 용량이 크지 않은 리소스 파일을 읽을 때에만 사용할 것.
     /// </summary>
     /// <param name="path"></param>
-    private static string GetResource(string path)
+    public static string GetResource(string path)
     {
       var assembly = Assembly.GetExecutingAssembly();
       var resourceName = "Gicc.resources." + path;

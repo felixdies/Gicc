@@ -15,7 +15,7 @@ namespace Gicc.Console
     {
       if (args.Length == 0)
       {
-        WriteLine(Usage.Main);
+        WriteLine(Resource.USAGE_MAIN);
         return;
       }
 
@@ -28,17 +28,17 @@ namespace Gicc.Console
           break;
 
         case "pull":
-          new Gicc(Environment.CurrentDirectory, true).Pull();
+          new Gicc(Environment.CurrentDirectory).Pull();
           break;
 
         case "push":
-          new Gicc(Environment.CurrentDirectory, true).Push();
+          new Gicc(Environment.CurrentDirectory).Push();
           break;
 
         case "list":
           if (args.Length < 2)
           {
-            WriteLine(Usage.List);
+            WriteLine(Resource.USAGE_LIST);
             return;
           }
           cc = new ClearCase(CreateCCInfo(args[1], Environment.CurrentDirectory));
@@ -48,7 +48,7 @@ namespace Gicc.Console
         case "tree":
           if (args.Length < 2)
           {
-            WriteLine(Usage.Tree);
+            WriteLine(Resource.USAGE_TREE);
             return;
           }
           cc = new ClearCase(CreateCCInfo(args[1], Environment.CurrentDirectory));
@@ -64,7 +64,7 @@ namespace Gicc.Console
           break;
 
         default:
-          WriteLine(Usage.Main);
+          WriteLine(Resource.USAGE_MAIN);
           return;
       }
     }
@@ -73,7 +73,7 @@ namespace Gicc.Console
     {
       if (args.Length < 4)
       {
-        WriteLine(Usage.Label);
+        WriteLine(Resource.USAGE_LABEL);
         return;
       }
 
@@ -90,7 +90,7 @@ namespace Gicc.Console
           break;
 
         default:
-          WriteLine(Usage.Label);
+          WriteLine(Resource.USAGE_LABEL);
           return;
       }
 
@@ -112,7 +112,7 @@ namespace Gicc.Console
           break;
         */
         default:
-          WriteLine(Usage.CS);
+          WriteLine(Resource.USAGE_CS);
           return;
       }
     }

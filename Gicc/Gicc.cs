@@ -15,14 +15,12 @@ namespace Gicc
     /// </summary>
     /// <param name="cwd"></param>
     /// <param name="parseConfigs">
-    /// config 값 파싱 여부 : Pull, Push - true / Label, Tree - false
     /// </param>
-    public Gicc(string cwd, bool parseConfigs)
+    public Gicc(string cwd)
     {
       this.CWD = cwd;
 
-      if (parseConfigs)
-        ParseAllConfigsFromConfigFile();
+      ParseAllConfigsFromConfigFile();
     }
 
     /// <summary>
@@ -111,6 +109,8 @@ namespace Gicc
       // todo : 최초 브랜치 checkin 지점 직전 snapshot 복사
       // todo : pull tag
       // todo : pull
+
+      throw new NotImplementedException();
     }
 
     public void Pull()
@@ -129,10 +129,13 @@ namespace Gicc
       List<DateTime> commitPoints = GetCommitPoints(ccHistory);
       for (int i = 0; i < commitPoints.Count - 2; i++)
         CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]); // todo: pull tag 가 since 가 돼야 함
+
+      throw new NotImplementedException();
     }
 
     public void Push()
     {
+      throw new NotImplementedException();
     }
 
     public List<string> ListCCFilesOnBranch(string branchName)

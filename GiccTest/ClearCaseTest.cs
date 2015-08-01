@@ -225,5 +225,22 @@ namespace Gicc.Test
 
 			Assert.Fail("could not catch checkout file : " + checkoutFile);
 		}
+
+    [TestCase(@"test.aspx@@/main/5", true)]
+    [TestCase(@"test.ascx@@/main/5", true)]
+    [TestCase(@"test.js@@/main/5", true)]
+    [TestCase(@"test.sql@@/main/5", true)]
+    [TestCase(@"test.cs@@/main/5", false)]
+    [TestCase(@"test.aspx", true)]
+    [TestCase(@"test.ascx", true)]
+    [TestCase(@"test.js", true)]
+    [TestCase(@"test.sql", true)]
+    [TestCase(@"test.cs", false)]
+    public void IsTargetExtensionTest(string path, bool result)
+    {
+      ClearCase cc = new ClearCase(BranchCCInfo);
+
+      Assert.AreEqual(result, cc.IsLabelingTargetExtension(path));
+    }
 	}
 }
