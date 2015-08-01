@@ -119,12 +119,12 @@ namespace Gicc
       ClearCase cc = new ClearCase(CreateCCInfo(this.BranchName));
       List<CCElementVersion> ccHistory = new List<CCElementVersion>();
 
-      cc.CheckAllSymbolicLinksAreMounted();
+      //cc.CheckAllSymbolicLinksAreMounted(); // symbolic link 는 nuget 으로 관리
       cc.CheckCheckedoutFileIsNotExist();
       git.CheckModifiedFileIsNotExist();
 
-      List<string> branchFileList = cc.FindAllFilesInBranch();
-      branchFileList.ForEach(file => ccHistory.AddRange(cc.Lshistory(file)));
+      cc.FindAllFilesInBranch()
+        .ForEach(file => ccHistory.AddRange(cc.Lshistory(file)));
 
       List<DateTime> commitPoints = GetCommitPoints(ccHistory);
       for (int i = 0; i < commitPoints.Count - 2; i++)
