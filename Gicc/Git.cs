@@ -19,53 +19,50 @@ namespace Gicc
 
     string RepoPath { get; set; }
 
-    internal string CurrentBranch
+    internal string GetCurrentBranch()
     {
-      get { return GetExecutedResult("rev-parse --abbrev-ref HEAD"); }
+      return GetExecutedResult("rev-parse --abbrev-ref HEAD");
     }
 
-    internal List<string> UntrackedFileList
+    internal List<string> GetUntrackedFileList()
     {
-      get { return GetExecutedResultList("ls-files --others"); }
+      return GetExecutedResultList("ls-files --others");
     }
 
-    internal List<string> ModifiedFileList
+    internal List<string> GetModifiedFileList()
     {
-      get { return GetExecutedResultList("diff --name-only"); }
+      return GetExecutedResultList("diff --name-only");
     }
 
-    internal List<string> BranchList
+    internal List<string> GetBranchList()
     {
-      get { return GetExecutedResultList("branch"); }
+      return GetExecutedResultList("branch");
     }
 
-    internal DateTime LastGiccPull
+    internal DateTime GetLastGiccPull()
     {
-      get
-      {
-        string lastPulledCommit = GetExecutedResult("show-ref --tags gicc_pull");
+      string lastPulledCommit = GetExecutedResult("show-ref --tags gicc_pull");
 
-        if (string.IsNullOrEmpty(lastPulledCommit)) // not tagged yet
-          return new DateTime(1990, 1, 1);
+      if (string.IsNullOrEmpty(lastPulledCommit)) // not tagged yet
+        return new DateTime(1990, 1, 1);
 
-        string lastGiccPullTime = GetExecutedResult("show -s --format=%ai " + lastPulledCommit.Substring(0, 10));
-        return DateTime.Parse(lastGiccPullTime);
-      }
+      string lastGiccPullTime = GetExecutedResult("show -s --format=%ai " + lastPulledCommit.Substring(0, 10));
+      return DateTime.Parse(lastGiccPullTime);
     }
 
     internal void CheckModifiedFileIsNotExist()
     {
-      if (UntrackedFileList.Count > 0)
+      if (GetUntrackedFileList().Count > 0)
       {
         string message = "새로 추가된 후 commit 되지 않은 파일이 있습니다." + Environment.NewLine;
-        message += string.Join(Environment.NewLine, UntrackedFileList);
+        message += string.Join(Environment.NewLine, GetUntrackedFileList());
         throw new GiccException(message);
       }
 
-      if (ModifiedFileList.Count > 0)
+      if (GetModifiedFileList().Count > 0)
       {
         string message = "변경된 후 commit 되지 않은 파일이 있습니다." + Environment.NewLine;
-        message += string.Join(Environment.NewLine, ModifiedFileList);
+        message += string.Join(Environment.NewLine, GetModifiedFileList());
         throw new GiccException(message);
       }
     }
@@ -118,7 +115,7 @@ namespace Gicc
 
     internal void Checkout(string branch)
     {
-      if (!BranchList.Any(existBranch => existBranch.Contains(branch)))
+      if (!GetBranchList().Any(existBranch => existBranch.Contains(branch)))
         Execute("checkout -b " + branch);
 
       Execute("checkout " + branch);

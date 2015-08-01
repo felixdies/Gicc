@@ -45,7 +45,7 @@ namespace Gicc.Test
 			Git gitMockup = new Git(GitMockupInfo);
 			gitMockup.TagPull();
 
-			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 8, 0), gitMockup.LastGiccPull);
+			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 8, 0), gitMockup.GetLastGiccPull());
 		}
 
 		[Test]
@@ -57,7 +57,7 @@ namespace Gicc.Test
 			//setup
 
 			List<string> expected = new string[] { "untracked1", "untracked2" }.ToList();
-			List<string> actual = new Git(GitMockupInfo).UntrackedFileList;
+			List<string> actual = new Git(GitMockupInfo).GetUntrackedFileList();
 
 			Assert.That(actual, Is.EquivalentTo(expected));
 
@@ -77,7 +77,7 @@ namespace Gicc.Test
 			//setup
 
 			List<string> expected = new string[] { "tt.txt" }.ToList();
-			List<string> actual = new Git(GitMockupInfo).ModifiedFileList;
+			List<string> actual = new Git(GitMockupInfo).GetModifiedFileList();
 
 			Assert.That(actual, Is.EquivalentTo(expected));
 

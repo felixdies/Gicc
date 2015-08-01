@@ -39,7 +39,7 @@ namespace Gicc.Test
 			Gicc gicc = new Gicc(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH);
 			Git git = new Git(GitInfo);
 
-			gicc.CopyAndCommit(CCMockupHistoryList, git.LastGiccPull, DateTime.Now);
+			gicc.CopyAndCommit(CCMockupHistoryList, git.GetLastGiccPull(), DateTime.Now);
 			throw new NotImplementedException();
 		}
 
