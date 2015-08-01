@@ -117,7 +117,7 @@ namespace Gicc
     {
       Git git = new Git(CreateGitInfo());
       ClearCase cc = new ClearCase(CreateCCInfo(this.BranchName));
-      List<CCElementVersion> ccHistory = null;
+      List<CCElementVersion> ccHistory = new List<CCElementVersion>();
 
       cc.CheckAllSymbolicLinksAreMounted();
       cc.CheckCheckedoutFileIsNotExist();

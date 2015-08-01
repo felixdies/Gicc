@@ -28,13 +28,19 @@ namespace Gicc
 
     protected abstract string Command { get; }
 
+    /// <summary>
+    /// 첫 번째 매개변수를 인자로 하는 Command 를 실행 합니다.
+    /// </summary>
+    /// <param name="arg"></param>
+    /// <param name="wait">해당 명령을 synchronized 처리합니다.</param>
+    /// 
     protected void Execute(string arg, bool wait = true)
     {
       Process proc = new Process();
       ProcessStartInfo proInfo = new ProcessStartInfo()
       {
         WorkingDirectory = ExecutingPath,
-        FileName = @"powershell",
+        FileName = @"powershell", // "cmd" doesn't execute the passed command.
         Arguments = Command + " " + arg,
         CreateNoWindow = true,
         UseShellExecute = false,
@@ -70,6 +76,7 @@ namespace Gicc
 
     /// <summary>
     /// 성능상 문제가 있을 때에만 사용.
+    /// Input 을 redirect 하기 위해 CreateNoWindow 를 fale 로 설정하므로, 커맨드창이 나타나는 부작용이 있다.
     /// </summary>
     /// <param name="arg"></param>
     /// <returns></returns>

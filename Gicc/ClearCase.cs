@@ -85,11 +85,10 @@ namespace Gicc
 
     internal void CheckCheckedoutFileIsNotExist()
     {
-      List<string> checkedoutFileList = LscheckoutInCurrentViewByLoginUser();
+      List<string> checkedoutFileList = LscheckoutInCurrentView();
       if (checkedoutFileList.Count > 0)
       {
-        string message =
-          "체크아웃 된 파일이 있습니다." + Environment.NewLine
+        string message = "체크아웃 된 파일이 있습니다." + Environment.NewLine
           + string.Join(Environment.NewLine, checkedoutFileList);
         throw new GiccException(message);
       }
@@ -245,6 +244,11 @@ namespace Gicc
     internal List<string> LscheckoutInCurrentViewByLoginUser()
     {
       return GetExecutedResultList("lscheckout -short -cview -me -recurse");
+    }
+
+    internal List<string> LscheckoutInCurrentView()
+    {
+      return GetExecutedResultList("lscheckout -short -cview -recurse");
     }
 
     // vob path 의 상위 디렉터리에서 mount 를 실행해야 한다.
