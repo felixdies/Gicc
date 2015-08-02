@@ -118,12 +118,12 @@ namespace Gicc
 
     internal void SetBranchCS()
     {
-      string[] branchCS = new string[]{
-				"element * CHECKEDOUT"
-				, "element -dir * /main/LATEST"
-				, "element -file * /main/" + BranchName + "/LATEST"
-				, "element -file * /main/LATEST -mkbranch " + BranchName
-			};
+      string[] branchCS = new string[] {
+        "element * CHECKEDOUT",
+        "element -dir * /main/LATEST",
+        "element -file * /main/" + BranchName + "/LATEST",
+        "element -file * /main/LATEST -mkbranch " + BranchName
+      };
 
       SetCS(branchCS);
     }
@@ -131,13 +131,13 @@ namespace Gicc
     internal void SetBranchCS(DateTime time)
     {
       string[] branchCS = new string[] {
-				"time " + time.ToString()
-				, "element * CHECKEDOUT"
-				, "element -dir * /main/LATEST"
-				, "element -file * /main/" + BranchName + "/LATEST"
-				, "element -file * /main/LATEST -mkbranch " + BranchName
-				, "end time"
-			};
+        "time " + time.ToString(),
+        "element * CHECKEDOUT",
+        "element -dir * /main/LATEST",
+        "element -file * /main/" + BranchName + "/LATEST",
+        "element -file * /main/LATEST -mkbranch " + BranchName,
+        "end time"
+      };
 
       SetCS(branchCS);
     }
@@ -152,7 +152,9 @@ namespace Gicc
       string args = string.Empty;
 
       if (!string.IsNullOrWhiteSpace(BranchName))
+      {
         args += " -branch 'brtype(" + BranchName + ")'";
+      }
 
       return GetExecutedResultList("find . " + args + " -print");
     }
@@ -162,7 +164,9 @@ namespace Gicc
       string args = string.Empty;
 
       if (!string.IsNullOrWhiteSpace(BranchName))
+      {
         args += " -branch 'brtype(" + BranchName + ")'";
+      }
 
       args += " -version '{created_since(" + since.AddSeconds(1).ToString() + ") && !created_since(" + until.AddSeconds(1).ToString() + ")}'";
 
@@ -189,11 +193,6 @@ namespace Gicc
       return targetExtension.Contains(Path.GetExtension(filePath.Split('@')[0]));
     }
 
-    private void LabelLastElement(string filePath, string branch, string label)
-    {
-      Execute("mklabel -replace -version \\" + branch + "\\LATEST " + label + " " + filePath, false);
-    }
-
     internal List<CCElementVersion> FindAllSymbolicLinks()
     {
       List<CCElementVersion> resultSLinkList = new List<CCElementVersion>();
@@ -212,8 +211,7 @@ namespace Gicc
 
       GetExecutedResultList("lshistory -fmt " + Fmt + " " + pname)
         .ForEach(elemVersion => resultList.Add(
-          new CCElementVersion(elemVersion) { VobPath = this.VobPath })
-          );
+          new CCElementVersion(elemVersion) { VobPath = this.VobPath }));
 
       return resultList;
     }
@@ -224,8 +222,7 @@ namespace Gicc
 
       GetExecutedResultList("lshistory -fmt " + Fmt + " -since" + since.AddSeconds(1) + " " + pname)
         .ForEach(elemVersion => resultList.Add(
-          new CCElementVersion(elemVersion) { VobPath = this.VobPath })
-          );
+          new CCElementVersion(elemVersion) { VobPath = this.VobPath }));
 
       return resultList;
     }
@@ -296,6 +293,11 @@ namespace Gicc
 
         return "rcleartool";
       }
+    }
+
+    private void LabelLastElement(string filePath, string branch, string label)
+    {
+      Execute("mklabel -replace -version \\" + branch + "\\LATEST " + label + " " + filePath, false);
     }
   }
 }

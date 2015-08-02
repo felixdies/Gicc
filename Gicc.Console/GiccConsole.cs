@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using System.IO;
 using Gicc;
 
 namespace Gicc.Console
 {
+  /// <summary>
+  /// 
+  /// </summary>
   public class GiccConsole
   {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
       if (args.Length == 0)
       {
@@ -41,6 +43,7 @@ namespace Gicc.Console
             WriteLine(Resource.USAGE_LIST);
             return;
           }
+
           cc = new ClearCase(CreateCCInfo(args[1], Environment.CurrentDirectory));
           cc.FindAllFilesInBranch().ForEach(file => WriteLine(file));
           break;
@@ -51,6 +54,7 @@ namespace Gicc.Console
             WriteLine(Resource.USAGE_TREE);
             return;
           }
+
           cc = new ClearCase(CreateCCInfo(args[1], Environment.CurrentDirectory));
           cc.FindAllFilesInBranch().ForEach(filePath => cc.ViewVersionTree(filePath));
           break;
@@ -69,7 +73,7 @@ namespace Gicc.Console
       }
     }
 
-    static private void Label(string[] args)
+    private static void Label(string[] args)
     {
       if (args.Length < 4)
       {
@@ -81,11 +85,13 @@ namespace Gicc.Console
 
       switch (args[1].ToLower())
       {
-        case "-main": case "-m":
+        case "-main":
+        case "-m":
           labeledBranch = "main";
           break;
 
-        case "-branch": case "-b":
+        case "-branch":
+        case "-b":
           labeledBranch = "main\\" + args[2];
           break;
 
@@ -98,12 +104,12 @@ namespace Gicc.Console
       cc.LabelLastElements(labeledBranch, args[3]);
     }
 
-    static private void ConfigSpec(string[] args)
+    private static void ConfigSpec(string[] args)
     {
       switch (args.Length)
       {
         case 2:
-          new ClearCase(CreateCCInfo("", Environment.CurrentDirectory)).CatCS()
+          new ClearCase(CreateCCInfo(string.Empty, Environment.CurrentDirectory)).CatCS()
             .ForEach(line => WriteLine(line));
           break;
         /*
@@ -120,7 +126,7 @@ namespace Gicc.Console
     /// <summary>
     /// Git 과 상관 없이 CC 를 실행 할 때 사용하는 생성자 정보
     /// </summary>
-    static private ClearCaseConstructInfo CreateCCInfo(string branchName, string executingPath)
+    private static ClearCaseConstructInfo CreateCCInfo(string branchName, string executingPath)
     {
       return new ClearCaseConstructInfo()
       {
@@ -131,7 +137,7 @@ namespace Gicc.Console
       };
     }
 
-    static void WriteLine(string value)
+    private static void WriteLine(string value)
     {
       System.Console.WriteLine(value);
     }

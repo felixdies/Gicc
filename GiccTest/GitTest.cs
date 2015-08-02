@@ -38,9 +38,9 @@ namespace Gicc.Test
 		[Test]
 		public void LastGiccPullTest()
 		{
-			//setup
+			// setup
 			CreateGitTestMockUp();
-			//setup
+			// setup
 
 			Git gitMockup = new Git(GitMockupInfo);
 			gitMockup.TagPull();
@@ -54,14 +54,14 @@ namespace Gicc.Test
 			CreateGitTestMockUp();
 			File.Create(Path.Combine(REPO_MOCKUP_PATH, "untracked1")).Close();
 			File.Create(Path.Combine(REPO_MOCKUP_PATH, "untracked2")).Close();
-			//setup
+			// setup
 
 			List<string> expected = new string[] { "untracked1", "untracked2" }.ToList();
 			List<string> actual = new Git(GitMockupInfo).GetUntrackedFileList();
 
 			Assert.That(actual, Is.EquivalentTo(expected));
 
-			//cleanup
+			// cleanup
 			File.Delete(Path.Combine(REPO_MOCKUP_PATH, "untracked1"));
 			File.Delete(Path.Combine(REPO_MOCKUP_PATH, "untracked2"));
 		}
@@ -74,25 +74,25 @@ namespace Gicc.Test
 			CreateGitTestMockUp();
 			string stored = File.ReadAllText(TT_PATH);
 			File.WriteAllText(TT_PATH, "modified");
-			//setup
+			// setup
 
 			List<string> expected = new string[] { "tt.txt" }.ToList();
 			List<string> actual = new Git(GitMockupInfo).GetModifiedFileList();
 
 			Assert.That(actual, Is.EquivalentTo(expected));
 
-			//cleanup
+			// cleanup
 			File.WriteAllText(TT_PATH, stored);
 		}
 
 		[Test]
 		public void IsIgnoredListTest()
 		{
-			//setup
+			// setup
 			Git git = new Git(GitInfo);
 			git.Init();
       File.WriteAllText(Path.Combine(REPO_PATH, ".gitignore"), Resource.GetResource("gitignore.txt"));
-			//setup
+			// setup
 
 			Dictionary<string, bool> ignoredList = new Dictionary<string, bool>()
 			{

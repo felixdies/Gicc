@@ -86,12 +86,12 @@ namespace Gicc
     internal void AddCommit(string message, string author, string date)
     {
       Execute("add --all .");
-      Commit(message, author, date);
+      this.Commit(message, author, date);
     }
 
     internal void Commit(string message, string author)
     {
-      Commit(message, author, DateTime.Now.ToString());
+      this.Commit(message, author, DateTime.Now.ToString());
     }
 
     internal void Commit(string message, string author, string date)

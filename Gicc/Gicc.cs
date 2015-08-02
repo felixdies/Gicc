@@ -41,7 +41,6 @@ namespace Gicc
     internal string GiccPath { get { return Path.Combine(CWD, @".git\gicc"); } }
     internal string ConfigPath { get { return Path.Combine(GiccPath, "config"); } }
 
-    #region Clone, Pull, Push 실행 필수 정보
     // Clone : 매개변수로 주어짐.
     // Pull, Push : config 파일에서 읽어 옴
 
@@ -63,10 +62,6 @@ namespace Gicc
     {
       return File.ReadAllLines(ConfigPath).ToList().Find(config => config.ToLower().StartsWith(configName)).Split('=').Last().Trim();
     }
-
-    #endregion Clone, Pull, Push 실행 필수 정보
-
-    #region Executor 생성자 정보
 
     /// <summary>
     /// git 실행 정보.
@@ -100,8 +95,6 @@ namespace Gicc
       };
     }
 
-    #endregion Executor 생성자 정보
-
     public void Clone()
     {
       // todo : init git
@@ -119,7 +112,7 @@ namespace Gicc
       ClearCase cc = new ClearCase(CreateCCInfo(this.BranchName));
       List<CCElementVersion> ccHistory = new List<CCElementVersion>();
 
-      //cc.CheckAllSymbolicLinksAreMounted(); // symbolic link 는 nuget 으로 관리
+      ////cc.CheckAllSymbolicLinksAreMounted(); // symbolic link 는 nuget 으로 관리
       cc.CheckCheckedoutFileIsNotExist();
       git.CheckModifiedFileIsNotExist();
 
@@ -151,11 +144,12 @@ namespace Gicc
     /// </summary>
     internal void WriteConfig()
     {
-      File.WriteAllLines(ConfigPath,
-        new string[]{
-					"vob = " + VobPath
-				, "branch = " + BranchName
-				, "repository = " + RepoPath});
+      string[] configArr = new string[] {
+        "vob = " + VobPath,
+        "branch = " + BranchName,
+        "repository = " + RepoPath };
+
+      File.WriteAllLines(ConfigPath, configArr);
     }
 
     internal void CopyAndCommit(List<CCElementVersion> ccHistory, DateTime since, DateTime until)
@@ -195,8 +189,8 @@ namespace Gicc
 
       foreach (string relativeFilePath in mainFileList)
       {
-        //if (!git.IsIgnored(relativeFilePath))
-        //File.Copy(Path.Combine(VobPath, relativeFilePath), Path.Combine(RepoPath, relativeFilePath), true);
+        ////if (!git.IsIgnored(relativeFilePath))
+        ////File.Copy(Path.Combine(VobPath, relativeFilePath), Path.Combine(RepoPath, relativeFilePath), true);
       }
     }
 

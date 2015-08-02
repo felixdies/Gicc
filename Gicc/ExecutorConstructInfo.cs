@@ -22,7 +22,9 @@ namespace Gicc
           throw new NullReferenceException("ExecutorConstructInfo 의 ExecutingPath 가 선언되지 않았습니다.");
         }
         else
+        {
           return _executingPath;
+        }
       }
       set { _executingPath = value; }
     }
@@ -36,7 +38,9 @@ namespace Gicc
           throw new NullReferenceException("ExecutorConstructInfo 의 OutPath 가 선언되지 않았습니다.");
         }
         else
+        {
           return _outPath;
+        }
       }
       set { _outPath = value; }
     }

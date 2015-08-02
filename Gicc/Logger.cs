@@ -10,17 +10,17 @@ namespace Gicc
 {
   public class Logger
   {
-    public string LogPath { get; set; }
-
     public Logger(string logPath)
     {
       this.LogPath = logPath;
     }
 
+    public string LogPath { get; set; }
+
     public void Write(string text)
     {
       // replace CR to CRLF
-      string beautifiedText = text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "\r\n  ");	// add spaces
+      string beautifiedText = text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "\r\n  ");  // add spaces
       AppendAllText(beautifiedText);
     }
 

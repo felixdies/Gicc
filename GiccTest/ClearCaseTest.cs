@@ -21,7 +21,7 @@ namespace Gicc.Test
 		/// main Branch 의 cc 실행 정보.
 		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
 		/// </summary>
-		ClearCaseConstructInfo MainCCInfo
+		private ClearCaseConstructInfo MainCCInfo
 		{
 			get
 			{
@@ -40,7 +40,7 @@ namespace Gicc.Test
 		/// 특정 Branch 의 cc 실행 정보.
 		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
 		/// </summary>
-		ClearCaseConstructInfo BranchCCInfo
+    private ClearCaseConstructInfo BranchCCInfo
 		{
 			get
 			{
@@ -58,7 +58,7 @@ namespace Gicc.Test
 		/// <summary>
 		/// Git 과 상관 없이 CC 를 실행 할 때 사용하는 생성자 정보
 		/// </summary>
-		ExecutorConstructInfo CCInfo
+    private ExecutorConstructInfo CCInfo
 		{
 			get
 			{
@@ -94,7 +94,7 @@ namespace Gicc.Test
 			new ClearCase(BranchCCInfo).SetDefaultCS();
 
 			List<string> expected = new List<string>(
-				new string[] {"element * CHECKEDOUT","element * /main/LATEST"}
+        new string[] { "element * CHECKEDOUT", "element * /main/LATEST" }
 				);
 			List<string> actual = new ClearCase(MainCCInfo).CatCS();
 
@@ -106,10 +106,10 @@ namespace Gicc.Test
 		public void SetBranchCSTest()
 		{
 			List<string> expected = new List<string>(new string[] {
-				"element * CHECKEDOUT"
-				, "element -dir * /main/LATEST"
-				, "element -file * /main/" + BRANCH_NAME + @"/LATEST"
-				, "element -file * /main/LATEST -mkbranch " + BRANCH_NAME
+				"element * CHECKEDOUT",
+				"element -dir * /main/LATEST",
+				"element -file * /main/" + BRANCH_NAME + @"/LATEST",
+				"element -file * /main/LATEST -mkbranch " + BRANCH_NAME
 			});
 
 			new ClearCase(BranchCCInfo).SetBranchCS();
@@ -144,7 +144,7 @@ namespace Gicc.Test
 			ClearCase cc = new ClearCase(BranchCCInfo);
 			cc.SetBranchCS();
 
-			List<string> targetFiles = new List<string>(new string[] {"main.txt", @".\sub\main.txt"});
+      List<string> targetFiles = new List<string>(new string[] { "main.txt", @".\sub\main.txt" });
 			List<string> actual;
 			
 			cc.Checkout(targetFiles[0]);
@@ -165,13 +165,14 @@ namespace Gicc.Test
 		[Test]
 		public void CheckAllSymbolicLinksAreMountedTest()
 		{
-			ExecutorConstructInfo VobInfo = new ExecutorConstructInfo(){
+      ExecutorConstructInfo VobInfo = new ExecutorConstructInfo()
+      {
 				ExecutingPath = VOB_PATH,
 				OutPath = "giccout",
 				LogPath = "gicclog"
 			};
-			
-			ExecutorConstructInfo ParentOfVobInfo = new ExecutorConstructInfo(){
+
+      ExecutorConstructInfo ParentOfVobInfo = new ExecutorConstructInfo(){
 				ExecutingPath = Path.GetDirectoryName(VOB_PATH),
 				OutPath = "giccout",
 				LogPath = "gicclog"

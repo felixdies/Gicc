@@ -1,33 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using System.IO;
 
 namespace Gicc
 {
   public class CCElementVersion
   {
+    internal CCElementVersion()
+    {
+    }
+
+    internal CCElementVersion(string versionInfo)
+    {
+      ParseFileInfo(versionInfo);
+    }
+
     public string Attributes { get; set; }
+
     public string Comment { get; set; }
+    
     public DateTime CreatedDate { get; set; }
+    
     public string EventDescription { get; set; }
+    
     public string CheckoutInfo { get; set; }
+    
     public string HostName { get; set; }
+    
     public string IndentLevel { get; set; }
+    
     public string Labels { get; set; }
+    
     public string ObjectKind { get; set; }
-    /// <summary> VOB path 로부터의 상대 경로 </summary>
+    
+    /// <summary> Gets or sets relative path from VOB path </summary>
     public string ElementName { get; set; }
+    
     public string Version { get; set; }
+    
     public string PredecessorVersion { get; set; }
+    
     public string Operation { get; set; }
+    
     public string Type { get; set; }
+    
     public string SymbolicLink { get; set; }
+    
     public string OwnerLoginName { get; set; }
+    
     public string OwnerFullName { get; set; }
+    
     public string HyperLinkInfo { get; set; }
 
     public string VobPath { get; set; }
@@ -46,25 +71,24 @@ namespace Gicc
     {
       get
       {
-        if (Operation == "rmver" || Operation == "rmhlink") // revert
+        if (Operation == "rmver" || Operation == "rmhlink")
+        {
+          // revert
           return -1;
-        else // commit : "checkin", "mkelem", "rmelem", ...
+        }
+        else
+        {
+          // commit : "checkin", "mkelem", "rmelem", ...
           return 0;
+        }
       }
     }
 
     public CCElementVersion Predecessor { get; set; }
+    
     public CCElementVersion HyperLinkedFrom { get; set; }
+    
     public CCElementVersion HyperLinkedTo { get; set; }
-
-    internal CCElementVersion()
-    {
-    }
-
-    internal CCElementVersion(string versionInfo)
-    {
-      ParseFileInfo(versionInfo);
-    }
 
     internal void ParseFileInfo(string versionInfo)
     {
@@ -75,7 +99,9 @@ namespace Gicc
       {
         int i = info.IndexOf('=');
         if (i < 0 || i == info.Length - 1)
+        {
           continue;
+        }
 
         string key = info.Substring(0, i);
         string value = info.Substring(i + 1, info.Length - (i + 1));
@@ -86,13 +112,17 @@ namespace Gicc
       {
         System.Reflection.PropertyInfo propertyInfo = this.GetType().GetProperty(pair.Key);
         if (propertyInfo != null && propertyInfo.PropertyType == typeof(string))
+        {
           propertyInfo.SetValue(this, pair.Value);
+        }
       }
 
       CreatedDate = DateTime.Parse(versionInfoDic["CreatedDate"]);
 
       if (versionInfoDic.ContainsKey("SymbolicLink"))
+      {
         SymbolicLink = Path.GetFullPath((new Uri(Path.Combine(VobPath, versionInfoDic["SymbolicLink"]))).LocalPath);
+      }
     }
   }
 }
