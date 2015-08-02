@@ -22,7 +22,7 @@ namespace Gicc.Test
 
 			Git git = new Git(GitInfo);
 
-			List<string> argList = new string[] { "", "help" }.ToList();
+			List<string> argList = new string[] { string.Empty, "help" }.ToList();
 			List<string> expected = new string[] { "usage", "usage" }.ToList();
 			List<string> actual = git.GetExecutedResultListWithoutFIO(argList);
 

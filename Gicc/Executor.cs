@@ -110,7 +110,6 @@ namespace Gicc
     /// </summary>
     /// <param name="arg"></param>
     /// <param name="wait">해당 명령을 synchronized 처리합니다.</param>
-    /// 
     protected void Execute(string arg, bool wait = true)
     {
       Process proc = new Process();

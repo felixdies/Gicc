@@ -10,7 +10,8 @@ namespace Gicc
   public class Gicc
   {
     /// <summary>
-    /// Clone 이외 명령어 실행 시 호출되는 생성자
+    /// Initializes a new instance of the <see cref="Gicc" /> class.
+    /// Clone 이외 명령어 실행 시 호출되는 생성자.
     /// </summary>
     /// <param name="cwd"></param>
     public Gicc(string cwd)
@@ -21,7 +22,8 @@ namespace Gicc
     }
 
     /// <summary>
-    /// Clone 명령어 실행 시 호출되는 생성자
+    /// Initializes a new instance of the <see cref="Gicc" /> class.
+    /// Clone 명령어 실행 시 호출되는 생성자.
     /// </summary>
     /// <param name="cwd"></param>
     /// <param name="absVobPath"></param>
@@ -122,7 +124,7 @@ namespace Gicc
     }
 
     /// <summary>
-    /// Config 파일에 VobPath, BranchName, RepoPath 속성을 기록
+    /// Config 파일에 VobPath, BranchName, RepoPath 속성을 기록한다.
     /// </summary>
     internal void WriteConfig()
     {

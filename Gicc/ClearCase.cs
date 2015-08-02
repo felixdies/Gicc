@@ -11,7 +11,8 @@ namespace Gicc
   public class ClearCase : Executor
   {
     /// <summary>
-    /// Clone, Pull, Push 명령어 실행 시 사용
+    /// Initializes a new instance of the <see cref="ClearCase" /> class.
+    /// Used when execute "Clone", "Pull", or "Push".
     /// </summary>
     /// <param name="constructInfo"></param>
     public ClearCase(ClearCaseConstructInfo constructInfo)
@@ -21,7 +22,8 @@ namespace Gicc
     }
 
     /// <summary>
-    /// Label, Tree 명령어 실행 시 사용
+    /// Initializes a new instance of the <see cref="ClearCase" /> class.
+    /// Used when execute "Label" or "Tree".
     /// </summary>
     /// <param name="constructInfo"></param>
     public ClearCase(ExecutorConstructInfo constructInfo)
