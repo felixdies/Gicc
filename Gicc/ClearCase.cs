@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using System.IO;
-using System.Diagnostics;
 
 namespace Gicc
 {
@@ -27,9 +26,37 @@ namespace Gicc
     /// <param name="constructInfo"></param>
     public ClearCase(ExecutorConstructInfo constructInfo)
       : base(constructInfo)
-    { }
+    {
+    }
 
-    string Fmt
+    public string VobPath { get; set; }
+
+    protected override string Command
+    {
+      get
+      {
+        ProcessStartInfo proInfo = new ProcessStartInfo()
+        {
+          WorkingDirectory = ExecutingPath,
+          FileName = "rcleartool",
+          CreateNoWindow = true,
+          UseShellExecute = false,
+        };
+
+        try
+        {
+          Process.Start(proInfo); // check if the user uses CCRC
+        }
+        catch
+        {
+          return "cleartool";
+        }
+
+        return "rcleartool";
+      }
+    }
+
+    private string Fmt
     {
       get
       {
@@ -56,95 +83,23 @@ namespace Gicc
       }
     }
 
-    string VobPath { get; set; }
-
-    internal string CurrentView
+    public void ViewVersionTree(string filePath)
     {
-      get
-      {
-        return GetExecutedResult("pwv").Split(' ')[3];
-      }
+      Execute("lsvtree -graphical " + filePath + "\\LATEST", false);
     }
 
-    internal string LogInUser
+    public void LabelLastElements(string labeledBranch, string label)
     {
-      get
-      {
-        List<string> viewInfo = GetExecutedResultList("lsview -long " + CurrentView);
-        return viewInfo.Find(info => info.StartsWith("View owner")).Split(' ')[2];
-      }
-    }
+      // todo: validate label
 
-    internal string LogInUserName
-    {
-      get
-      {
-        return LogInUser.Split('\\').Last();
-      }
-    }
-
-    internal void CheckCheckedoutFileIsNotExist()
-    {
-      List<string> checkedoutFileList = LscheckoutInCurrentView();
-      if (checkedoutFileList.Count > 0)
-      {
-        string message = "체크아웃 된 파일이 있습니다." + Environment.NewLine
-          + string.Join(Environment.NewLine, checkedoutFileList);
-        throw new GiccException(message);
-      }
-    }
-
-    internal void CheckAllSymbolicLinksAreMounted()
-    {
-      List<CCElementVersion> slinkList = FindAllSymbolicLinks();
-
-      foreach (CCElementVersion link in slinkList)
-      {
-        if (!System.IO.Directory.Exists(link.SymbolicLink))
-          throw new GiccException(link.SymbolicLink + " VOB 이 mount 되지 않았습니다.");
-      }
+      FindAllFilesInBranch()
+        .Where(filePath => IsLabelingTargetExtension(filePath)).ToList()
+        .ForEach(filePath => LabelLastElement(filePath, labeledBranch, label));
     }
 
     public List<string> CatCS()
     {
       return GetExecutedResultList("catcs");
-    }
-
-    internal void SetCS(string[] configSpec)
-    {
-      File.WriteAllLines(OutPath, configSpec);
-      Execute("setcs " + OutPath);
-    }
-
-    internal void SetBranchCS()
-    {
-      string[] branchCS = new string[] {
-        "element * CHECKEDOUT",
-        "element -dir * /main/LATEST",
-        "element -file * /main/" + BranchName + "/LATEST",
-        "element -file * /main/LATEST -mkbranch " + BranchName
-      };
-
-      SetCS(branchCS);
-    }
-
-    internal void SetBranchCS(DateTime time)
-    {
-      string[] branchCS = new string[] {
-        "time " + time.ToString(),
-        "element * CHECKEDOUT",
-        "element -dir * /main/LATEST",
-        "element -file * /main/" + BranchName + "/LATEST",
-        "element -file * /main/LATEST -mkbranch " + BranchName,
-        "end time"
-      };
-
-      SetCS(branchCS);
-    }
-
-    internal void SetDefaultCS()
-    {
-      Execute("setcs -default");
     }
 
     public List<string> FindAllFilesInBranch()
@@ -173,79 +128,67 @@ namespace Gicc
       return GetExecutedResultList("find . " + args + " -print");
     }
 
-    public void ViewVersionTree(string filePath)
+    internal void CheckCheckedoutFileIsNotExist()
     {
-      Execute("lsvtree -graphical " + filePath + "\\LATEST", false);
+      List<string> checkedoutFileList = LscheckoutInCurrentView();
+      if (checkedoutFileList.Count > 0)
+      {
+        string message = "체크아웃 된 파일이 있습니다." + Environment.NewLine
+          + string.Join(Environment.NewLine, checkedoutFileList);
+        throw new GiccException(message);
+      }
     }
 
-    public void LabelLastElements(string labeledBranch, string label)
+    internal void CheckAllSymbolicLinksAreMounted()
     {
-      // todo: validate label
+      List<CCElementVersion> slinkList = FindAllSymbolicLinks();
 
-      FindAllFilesInBranch()
-        .Where(filePath => IsLabelingTargetExtension(filePath)).ToList()
-        .ForEach(filePath => LabelLastElement(filePath, labeledBranch, label));
+      foreach (CCElementVersion link in slinkList)
+      {
+        if (!System.IO.Directory.Exists(link.SymbolicLink))
+        {
+          throw new GiccException(link.SymbolicLink + " VOB 이 mount 되지 않았습니다.");
+        }
+      }
     }
 
-    internal bool IsLabelingTargetExtension(string filePath)
+    internal void SetCS(string[] configSpec)
     {
-      List<string> targetExtension = new List<string>(new string[] { ".aspx", ".ascx", ".js", ".sql" });
-      return targetExtension.Contains(Path.GetExtension(filePath.Split('@')[0]));
+      File.WriteAllLines(OutPath, configSpec);
+      Execute("setcs " + OutPath);
     }
 
-    internal List<CCElementVersion> FindAllSymbolicLinks()
+    internal void SetBranchCS()
     {
-      List<CCElementVersion> resultSLinkList = new List<CCElementVersion>();
-      List<string> foundSLinkList;
+      string[] branchCS = new string[] 
+      {
+        "element * CHECKEDOUT",
+        "element -dir * /main/LATEST",
+        "element -file * /main/" + BranchName + "/LATEST",
+        "element -file * /main/LATEST -mkbranch " + BranchName
+      };
 
-      foundSLinkList = GetExecutedResultList("find " + VobPath + " -type l -print");
-
-      foundSLinkList.ForEach(link => resultSLinkList.Add(Describe(link)));
-
-      return resultSLinkList;
+      SetCS(branchCS);
     }
 
-    internal List<CCElementVersion> Lshistory(string pname)
+    internal void SetBranchCS(DateTime time)
     {
-      List<CCElementVersion> resultList = new List<CCElementVersion>();
+      string[] branchCS = new string[] 
+      {
+        "time " + time.ToString(),
+        "element * CHECKEDOUT",
+        "element -dir * /main/LATEST",
+        "element -file * /main/" + BranchName + "/LATEST",
+        "element -file * /main/LATEST -mkbranch " + BranchName,
+        "end time"
+      };
 
-      GetExecutedResultList("lshistory -fmt " + Fmt + " " + pname)
-        .ForEach(elemVersion => resultList.Add(
-          new CCElementVersion(elemVersion) { VobPath = this.VobPath }));
-
-      return resultList;
+      SetCS(branchCS);
     }
 
-    internal List<CCElementVersion> Lshistory(string pname, DateTime since)
+    internal void SetDefaultCS()
     {
-      List<CCElementVersion> resultList = new List<CCElementVersion>();
-
-      GetExecutedResultList("lshistory -fmt " + Fmt + " -since" + since.AddSeconds(1) + " " + pname)
-        .ForEach(elemVersion => resultList.Add(
-          new CCElementVersion(elemVersion) { VobPath = this.VobPath }));
-
-      return resultList;
-    }
-
-    internal CCElementVersion Describe(string pname)
-    {
-      string description = GetExecutedResult("describe -fmt " + Fmt + " " + pname);
-      return new CCElementVersion(description) { VobPath = this.VobPath };
-    }
-
-    internal string Pwd()
-    {
-      return GetExecutedResult("pwd");
-    }
-
-    internal List<string> LscheckoutInCurrentViewByLoginUser()
-    {
-      return GetExecutedResultList("lscheckout -short -cview -me -recurse");
-    }
-
-    internal List<string> LscheckoutInCurrentView()
-    {
-      return GetExecutedResultList("lscheckout -short -cview -recurse");
+      Execute("setcs -default");
     }
 
     // vob path 의 상위 디렉터리에서 mount 를 실행해야 한다.
@@ -270,29 +213,87 @@ namespace Gicc
       Execute("uncheckout -keep " + pname);
     }
 
-    protected override string Command
+    internal bool IsLabelingTargetExtension(string filePath)
     {
-      get
-      {
-        ProcessStartInfo proInfo = new ProcessStartInfo()
-        {
-          WorkingDirectory = ExecutingPath,
-          FileName = "rcleartool",
-          CreateNoWindow = true,
-          UseShellExecute = false,
-        };
+      List<string> targetExtension = new List<string>(new string[] { ".aspx", ".ascx", ".js", ".sql" });
+      return targetExtension.Contains(Path.GetExtension(filePath.Split('@')[0]));
+    }
 
-        try
-        {
-          Process.Start(proInfo); // check if the user uses CCRC
-        }
-        catch
-        {
-          return "cleartool";
-        }
+    internal string GetCurrentView()
+    {
+      return GetExecutedResult("pwv").Split(' ')[3];
+    }
 
-        return "rcleartool";
-      }
+    internal string GetLogInUser()
+    {
+      List<string> viewInfo = GetExecutedResultList("lsview -long " + GetCurrentView());
+      return viewInfo.Find(info => info.StartsWith("View owner")).Split(' ')[2];
+    }
+
+    internal string GetLogInUserName()
+    {
+      return GetLogInUser().Split('\\').Last();
+    }
+
+    internal string Pwd()
+    {
+      return GetExecutedResult("pwd");
+    }
+
+    internal CCElementVersion Describe(string pname)
+    {
+      string description = GetExecutedResult("describe -fmt " + Fmt + " " + pname);
+      return new CCElementVersion(description) { VobPath = this.VobPath };
+    }
+
+    internal List<string> LscheckoutInCurrentViewByLoginUser()
+    {
+      return GetExecutedResultList("lscheckout -short -cview -me -recurse");
+    }
+
+    internal List<string> LscheckoutInCurrentView()
+    {
+      return GetExecutedResultList("lscheckout -short -cview -recurse");
+    }
+
+    internal List<CCElementVersion> FindAllSymbolicLinks()
+    {
+      List<CCElementVersion> resultSLinkList = new List<CCElementVersion>();
+      List<string> foundSLinkList;
+
+      foundSLinkList = GetExecutedResultList("find " + VobPath + " -type l -print");
+
+      foundSLinkList.ForEach(link => resultSLinkList.Add(Describe(link)));
+
+      return resultSLinkList;
+    }
+
+    internal List<CCElementVersion> Lshistory(string pname)
+    {
+      List<CCElementVersion> resultList = new List<CCElementVersion>();
+
+      GetExecutedResultList("lshistory -fmt " + Fmt + " " + pname)
+        .ForEach(elemVersion => resultList.Add(
+          new CCElementVersion(elemVersion) 
+          {
+            VobPath = this.VobPath
+          }));
+
+      return resultList;
+    }
+
+    internal List<CCElementVersion> Lshistory(string pname, DateTime since)
+    {
+      List<CCElementVersion> resultList = new List<CCElementVersion>();
+
+      GetExecutedResultList("lshistory -fmt " + Fmt + " -since" + since.AddSeconds(1) + " " + pname)
+        .ForEach(elemVersion => resultList.Add(
+          new CCElementVersion(elemVersion) 
+          {
+            VobPath = this.VobPath 
+          }));
+
+      return resultList;
     }
 
     private void LabelLastElement(string filePath, string branch, string label)

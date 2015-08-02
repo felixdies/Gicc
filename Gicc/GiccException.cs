@@ -9,6 +9,7 @@ namespace Gicc
   public class GiccException : Exception
   {
     public GiccException()
+      : base()
     {
     }
 

@@ -9,7 +9,9 @@ namespace Gicc
   public class ExecutorConstructInfo
   {
     private string _executingPath;
+    
     private string _outPath;
+    
     private string _logPath;
 
     public string ExecutingPath
@@ -26,8 +28,13 @@ namespace Gicc
           return _executingPath;
         }
       }
-      set { _executingPath = value; }
+
+      set
+      {
+        _executingPath = value;
+      }
     }
+    
     public string OutPath
     {
       get
@@ -42,8 +49,13 @@ namespace Gicc
           return _outPath;
         }
       }
-      set { _outPath = value; }
+
+      set
+      {
+        _outPath = value;
+      }
     }
+    
     public string LogPath
     {
       get
@@ -54,9 +66,15 @@ namespace Gicc
           throw new NullReferenceException("ExecutorConstructInfo 의 LogPath 가 선언되지 않았습니다.");
         }
         else
+        {
           return _logPath;
+        }
       }
-      set { _logPath = value; }
+
+      set
+      {
+        _logPath = value;
+      }
     }
 
     public string BranchName { get; set; }

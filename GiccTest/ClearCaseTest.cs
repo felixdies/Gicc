@@ -123,19 +123,19 @@ namespace Gicc.Test
 		[Test]
 		public void CurrentViewTest()
 		{
-			Assert.AreEqual(ConfigurationManager.AppSettings["ViewName"], new ClearCase(BranchCCInfo).CurrentView);
+			Assert.AreEqual(ConfigurationManager.AppSettings["ViewName"], new ClearCase(BranchCCInfo).GetCurrentView());
 		}
 
 		[Test]
 		public void LogInUserTest()
 		{
-			Assert.AreEqual(ConfigurationManager.AppSettings["LogInUser"], new ClearCase(BranchCCInfo).LogInUser);
+			Assert.AreEqual(ConfigurationManager.AppSettings["LogInUser"], new ClearCase(BranchCCInfo).GetLogInUser());
 		}
 		
 		[Test]
 		public void LogInUserNameTest()
 		{
-			Assert.AreEqual(ConfigurationManager.AppSettings["LogInUserName"], new ClearCase(BranchCCInfo).LogInUserName);
+			Assert.AreEqual(ConfigurationManager.AppSettings["LogInUserName"], new ClearCase(BranchCCInfo).GetLogInUserName());
 		}
 
 		[Test]

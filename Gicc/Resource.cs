@@ -1,39 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
-using System.Reflection;
-using System.IO;
 
 namespace Gicc
 {
   public class Resource
   {
     public static string USAGE_MAIN
-    { get { return GetResource("usage_main.txt"); } }
+    {
+      get { return GetResource("usage_main.txt"); }
+    }
 
     public static string USAGE_CLONE
-    { get { return GetResource("usage_clone.txt"); } }
+    {
+      get { return GetResource("usage_clone.txt"); }
+    }
 
     public static string USAGE_PULL
-    { get { return GetResource("usage_pull.txt"); } }
+    {
+      get { return GetResource("usage_pull.txt"); }
+    }
 
     public static string USAGE_PUSH
-    { get { return GetResource("usage_push.txt"); } }
+    {
+      get { return GetResource("usage_push.txt"); }
+    }
 
     public static string USAGE_LIST
-    { get { return GetResource("usage_list.txt"); } }
+    {
+      get { return GetResource("usage_list.txt"); }
+    }
 
     public static string USAGE_TREE
-    { get { return GetResource("usage_tree.txt"); } }
+    {
+      get { return GetResource("usage_tree.txt"); }
+    }
 
     public static string USAGE_LABEL
-    { get { return GetResource("usage_label.txt"); } }
+    {
+      get { return GetResource("usage_label.txt"); }
+    }
 
     public static string USAGE_CS
-    { get { return GetResource("usage_cs.txt"); } }
+    {
+      get { return GetResource("usage_cs.txt"); }
+    }
 
     /// <summary>
     /// 어셈블리에 포함된 리소스의 문자열을 읽는다.

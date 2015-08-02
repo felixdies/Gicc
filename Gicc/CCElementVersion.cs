@@ -36,7 +36,7 @@ namespace Gicc
     
     public string ObjectKind { get; set; }
     
-    /// <summary> Gets or sets relative path from VOB path </summary>
+    // <summary> Gets or sets relative path from VOB path </summary>
     public string ElementName { get; set; }
     
     public string Version { get; set; }

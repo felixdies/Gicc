@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using System.IO;
-using System.Diagnostics;
-
 namespace Gicc
 {
-  class Git : Executor
+  public class Git : Executor
   {
     public Git(GitConstructInfo constructInfo)
       : base(constructInfo)
@@ -17,7 +16,12 @@ namespace Gicc
       this.RepoPath = constructInfo.RepoPath;
     }
 
-    string RepoPath { get; set; }
+    protected override string Command
+    {
+      get { return "git"; }
+    }
+
+    private string RepoPath { get; set; }
 
     internal string GetCurrentBranch()
     {
@@ -43,8 +47,11 @@ namespace Gicc
     {
       string lastPulledCommit = GetExecutedResult("show-ref --tags gicc_pull");
 
-      if (string.IsNullOrEmpty(lastPulledCommit)) // not tagged yet
+      // not tagged yet
+      if (string.IsNullOrEmpty(lastPulledCommit))
+      {
         return new DateTime(1990, 1, 1);
+      }
 
       string lastGiccPullTime = GetExecutedResult("show -s --format=%ai " + lastPulledCommit.Substring(0, 10));
       return DateTime.Parse(lastGiccPullTime);
@@ -107,23 +114,20 @@ namespace Gicc
     internal List<bool> IsIgnoredList(List<string> fileNameList)
     {
       List<string> argList = fileNameList.Select(filename => "check-ignore " + filename).ToList();
-      List<string> ExecuteResultList = GetExecutedResultListWithoutFIO(argList);
+      List<string> executeResultList = GetExecutedResultListWithoutFIO(argList);
 
       // result is not empty if the file is ignored
-      return ExecuteResultList.Select(result => !string.IsNullOrWhiteSpace(result)).ToList();
+      return executeResultList.Select(result => !string.IsNullOrWhiteSpace(result)).ToList();
     }
 
     internal void Checkout(string branch)
     {
       if (!GetBranchList().Any(existBranch => existBranch.Contains(branch)))
+      {
         Execute("checkout -b " + branch);
+      }
 
       Execute("checkout " + branch);
-    }
-
-    protected override string Command
-    {
-      get { return "git"; }
     }
   }
 }

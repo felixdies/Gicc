@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using System.IO;
 
 namespace Gicc
 {
@@ -38,62 +37,37 @@ namespace Gicc
     }
 
     internal string CWD { get; set; }
-    internal string GiccPath { get { return Path.Combine(CWD, @".git\gicc"); } }
-    internal string ConfigPath { get { return Path.Combine(GiccPath, "config"); } }
 
-    // Clone : 매개변수로 주어짐.
-    // Pull, Push : config 파일에서 읽어 옴
+    internal string GiccPath
+    {
+      get
+      {
+        return Path.Combine(CWD, @".git\gicc");
+      }
+    }
 
+    internal string ConfigPath
+    {
+      get
+      {
+        return Path.Combine(GiccPath, "config");
+      }
+    }
+
+    /// <summary>
+    /// Clone 호출 시 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
+    /// </summary>
     internal string VobPath { get; set; }
+
+    /// <summary>
+    /// Clone 호출 시 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
+    /// </summary>
     internal string BranchName { get; set; }
+
+    /// <summary>
+    /// Clone 호출 시 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
+    /// </summary>
     internal string RepoPath { get; set; }
-
-    void ParseAllConfigsFromConfigFile()
-    {
-      if (!File.Exists(ConfigPath))
-        throw new GiccException("Gicc 설정 파일을 찾을 수 없습니다. 현재 위치가 Local 저장소의 최상위 폴더가 맞는 지 확인 해 주세요.");
-
-      VobPath = ParseConfigFromConfigFile("vob");
-      BranchName = ParseConfigFromConfigFile("branch");
-      RepoPath = ParseConfigFromConfigFile("repository");
-    }
-
-    string ParseConfigFromConfigFile(string configName)
-    {
-      return File.ReadAllLines(ConfigPath).ToList().Find(config => config.ToLower().StartsWith(configName)).Split('=').Last().Trim();
-    }
-
-    /// <summary>
-    /// git 실행 정보.
-    /// git 실행 경로는 언제나 local repository 이다.
-    /// </summary>
-    GitConstructInfo CreateGitInfo()
-    {
-      return new GitConstructInfo()
-      {
-        RepoPath = this.RepoPath,
-        BranchName = this.BranchName,
-        ExecutingPath = this.RepoPath,
-        OutPath = Path.Combine(this.GiccPath, "gitout"),
-        LogPath = Path.Combine(this.GiccPath, "log")
-      };
-    }
-
-    /// <summary>
-    /// cc 실행 정보.
-    /// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
-    /// </summary>
-    ClearCaseConstructInfo CreateCCInfo(string branchName)
-    {
-      return new ClearCaseConstructInfo()
-      {
-        VobPath = this.VobPath,
-        BranchName = branchName,
-        ExecutingPath = this.VobPath,
-        OutPath = Path.Combine(this.GiccPath, "ccout"),
-        LogPath = Path.Combine(this.GiccPath, "log")
-      };
-    }
 
     public void Clone()
     {
@@ -121,7 +95,9 @@ namespace Gicc
 
       List<DateTime> commitPoints = GetCommitPoints(ccHistory);
       for (int i = 0; i < commitPoints.Count - 2; i++)
+      {
         CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]); // todo: pull tag 가 since 가 돼야 함
+      }
 
       throw new NotImplementedException();
     }
@@ -144,10 +120,12 @@ namespace Gicc
     /// </summary>
     internal void WriteConfig()
     {
-      string[] configArr = new string[] {
+      string[] configArr = new string[]
+      {
         "vob = " + VobPath,
         "branch = " + BranchName,
-        "repository = " + RepoPath };
+        "repository = " + RepoPath
+      };
 
       File.WriteAllLines(ConfigPath, configArr);
     }
@@ -183,17 +161,6 @@ namespace Gicc
       git.TagPull(); // todo : if changed
     }
 
-    private void CopyFromVOBToRepo(List<string> mainFileList)
-    {
-      Git git = new Git(CreateGitInfo());
-
-      foreach (string relativeFilePath in mainFileList)
-      {
-        ////if (!git.IsIgnored(relativeFilePath))
-        ////File.Copy(Path.Combine(VobPath, relativeFilePath), Path.Combine(RepoPath, relativeFilePath), true);
-      }
-    }
-
     /// <summary>
     /// 매개변수로 전달 된 cc history 를 snapshot 으로 만들기 위해, commit points 를 잡는다.
     /// 동일 브랜치 내에서 한 명의 사용자가 연속으로 check in 한 기록이 하나의 snapshot 이 된다.
@@ -226,6 +193,66 @@ namespace Gicc
       }
 
       return resultCommitPoints;
+    }
+
+    private void CopyFromVOBToRepo(List<string> mainFileList)
+    {
+      Git git = new Git(CreateGitInfo());
+
+      foreach (string relativeFilePath in mainFileList)
+      {
+        ////if (!git.IsIgnored(relativeFilePath))
+        ////File.Copy(Path.Combine(VobPath, relativeFilePath), Path.Combine(RepoPath, relativeFilePath), true);
+      }
+    }
+
+    private void ParseAllConfigsFromConfigFile()
+    {
+      if (!File.Exists(ConfigPath))
+      {
+        throw new GiccException("Gicc 설정 파일을 찾을 수 없습니다. 현재 위치가 Local 저장소의 최상위 폴더가 맞는 지 확인 해 주세요.");
+      }
+
+      VobPath = ParseConfigFromConfigFile("vob");
+      BranchName = ParseConfigFromConfigFile("branch");
+      RepoPath = ParseConfigFromConfigFile("repository");
+    }
+
+    private string ParseConfigFromConfigFile(string configName)
+    {
+      return File.ReadAllLines(ConfigPath).ToList().Find(config => config.ToLower().StartsWith(configName)).Split('=').Last().Trim();
+    }
+
+    /// <summary>
+    /// git 실행 정보.
+    /// git 실행 경로는 언제나 local repository 이다.
+    /// </summary>
+    private GitConstructInfo CreateGitInfo()
+    {
+      return new GitConstructInfo()
+      {
+        RepoPath = this.RepoPath,
+        BranchName = this.BranchName,
+        ExecutingPath = this.RepoPath,
+        OutPath = Path.Combine(this.GiccPath, "gitout"),
+        LogPath = Path.Combine(this.GiccPath, "log")
+      };
+    }
+
+    /// <summary>
+    /// cc 실행 정보.
+    /// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
+    /// </summary>
+    private ClearCaseConstructInfo CreateCCInfo(string branchName)
+    {
+      return new ClearCaseConstructInfo()
+      {
+        VobPath = this.VobPath,
+        BranchName = branchName,
+        ExecutingPath = this.VobPath,
+        OutPath = Path.Combine(this.GiccPath, "ccout"),
+        LogPath = Path.Combine(this.GiccPath, "log")
+      };
     }
   }
 }
