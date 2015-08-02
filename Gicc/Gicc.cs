@@ -13,8 +13,6 @@ namespace Gicc
     /// Clone 이외 명령어 실행 시 호출되는 생성자
     /// </summary>
     /// <param name="cwd"></param>
-    /// <param name="parseConfigs">
-    /// </param>
     public Gicc(string cwd)
     {
       this.CWD = cwd;
@@ -25,6 +23,7 @@ namespace Gicc
     /// <summary>
     /// Clone 명령어 실행 시 호출되는 생성자
     /// </summary>
+    /// <param name="cwd"></param>
     /// <param name="absVobPath"></param>
     /// <param name="branchName"></param>
     /// <param name="absRepoPath"></param>
@@ -55,16 +54,19 @@ namespace Gicc
     }
 
     /// <summary>
+    /// Gets or sets ClearCase's absolute VOB path.
     /// Clone 호출 시 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
     /// </summary>
     internal string VobPath { get; set; }
 
     /// <summary>
+    /// Gets or sets ClearCase and Git's branch name.
     /// Clone 호출 시 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
     /// </summary>
     internal string BranchName { get; set; }
 
     /// <summary>
+    /// Gets or sets Git's absolute repository path.
     /// Clone 호출 시 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
     /// </summary>
     internal string RepoPath { get; set; }
@@ -72,9 +74,13 @@ namespace Gicc
     public void Clone()
     {
       // todo : init git
+      
       WriteConfig();
+
       // todo : 최초 브랜치 checkin 지점 직전 snapshot 복사
+      
       // todo : pull tag
+      
       // todo : pull
 
       throw new NotImplementedException();
@@ -243,6 +249,7 @@ namespace Gicc
     /// cc 실행 정보.
     /// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
     /// </summary>
+    /// <param name="branchName"></param>
     private ClearCaseConstructInfo CreateCCInfo(string branchName)
     {
       return new ClearCaseConstructInfo()

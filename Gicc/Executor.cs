@@ -33,7 +33,7 @@ namespace Gicc
     /// 성능상 문제가 있을 때에만 사용.
     /// Input 을 redirect 하기 위해 CreateNoWindow 를 false 로 설정하므로, 커맨드창이 나타나는 부작용이 있다.
     /// </summary>
-    /// <param name="arg"></param>
+    /// <param name="argList"></param>
     /// <returns></returns>
     protected internal string GetExecutedResultWithoutFIO(List<string> argList)
     {
