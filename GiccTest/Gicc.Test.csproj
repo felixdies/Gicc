@@ -52,6 +52,7 @@
     <Compile Include="FileEx.cs" />
     <Compile Include="GitTest.cs" />
     <Compile Include="GiccTestBase.cs" />
+    <Compile Include="GlobTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GiccTest.cs" />
   </ItemGroup>
