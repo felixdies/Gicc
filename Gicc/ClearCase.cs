@@ -154,7 +154,7 @@ namespace Gicc.Lib
       }
     }
 
-    internal void SetCS(string[] configSpec)
+    private void SetCS(string[] configSpec)
     {
       File.WriteAllLines(OutPath, configSpec);
       Execute("setcs " + OutPath);
@@ -186,6 +186,19 @@ namespace Gicc.Lib
       };
 
       SetCS(branchCS);
+    }
+
+    internal void SetMainCS(DateTime time)
+    {
+      string[] mainCS = new string[] 
+      {
+        "time " + time.ToString(),
+        "element * CHECKEDOUT",
+        "element * /main/LATEST",
+        "end time"
+      };
+
+      SetCS(mainCS);
     }
 
     internal void SetDefaultCS()
@@ -268,6 +281,18 @@ namespace Gicc.Lib
       foundSLinkList.ForEach(link => resultSLinkList.Add(Describe(link)));
 
       return resultSLinkList;
+    }
+
+    internal List<CCElementVersion> GetAllVersionsInBranch()
+    {
+      List<CCElementVersion> resultList = new List<CCElementVersion>();
+
+      foreach(string file in FindAllFilesInBranch())
+      {
+        resultList.AddRange(Lshistory(file));
+      }
+
+      return resultList;
     }
 
     internal List<CCElementVersion> Lshistory(string pname)

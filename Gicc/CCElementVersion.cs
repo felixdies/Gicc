@@ -90,6 +90,16 @@ namespace Gicc.Lib
     
     public CCElementVersion HyperLinkedTo { get; set; }
 
+    public static int CompareVersionsByCreatedDate(CCElementVersion ver1, CCElementVersion ver2)
+    {
+      if (ver1 == null || ver2 == null)
+      {
+        throw new ArgumentNullException("CC 버전은 null 일 수 없습니다.");
+      }
+
+      return ver1.CreatedDate.CompareTo(ver2.CreatedDate);
+    }
+
     internal void ParseFileInfo(string versionInfo)
     {
       List<string> versionInfoList = versionInfo.Split('|').ToList();

@@ -13,6 +13,11 @@ namespace Gicc.Lib
     public Git(GitConstructInfo constructInfo)
       : base(constructInfo)
     {
+      if (!Path.IsPathRooted(constructInfo.RepoPath))
+      {
+        throw new ArgumentException("the repository path is not absolute path.");
+      }
+
       this.RepoPath = constructInfo.RepoPath;
     }
 
@@ -21,7 +26,10 @@ namespace Gicc.Lib
       get { return "git"; }
     }
 
-    private string RepoPath { get; set; }
+    /// <summary>
+    /// Gets or sets absolute repository path.
+    /// </summary>
+    internal string RepoPath { get; set; }
 
     internal string GetCurrentBranch()
     {
@@ -76,6 +84,11 @@ namespace Gicc.Lib
 
     internal string Init()
     {
+      if (!Directory.Exists(RepoPath))
+      {
+        Directory.CreateDirectory(RepoPath);
+      }
+
       return GetExecutedResult("init");
     }
 

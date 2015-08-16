@@ -1,1 +1,1 @@
-﻿usage : gicc clone <CC VOB 경로> <CC branch name> <git 저장소 이름>
+﻿usage : gicc clone <CC VOB 절대경로> <branch name> <git 저장소 이름>

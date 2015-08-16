@@ -26,7 +26,7 @@ namespace Gicc.Console
       switch (args[0].ToLower())
       {
         case "clone":
-          new GiccCore(Environment.CurrentDirectory, args[1], args[2], args[3]).Clone();
+          Clone(args);
           break;
 
         case "pull":
@@ -71,6 +71,32 @@ namespace Gicc.Console
           WriteLine(Resource.USAGE_MAIN);
           return;
       }
+    }
+
+    private static void Clone(string[] args)
+    {
+      if (args.Length < 4)
+      {
+        WriteLine(Resource.USAGE_CLONE);
+        return;
+      }
+
+      string absVobPath = string.Empty;
+      if (!Path.IsPathRooted(args[3]))
+      {
+        WriteLine("입력한 CC VOB 이 절대 경로가 맞는 지 확인 해 주세요.");
+        return;
+      }
+      else
+      {
+        absVobPath = args[3];
+      }
+
+      string branchName = args[2];
+
+      string absRepoPath = Path.IsPathRooted(args[3]) ? args[3] : Path.Combine(Environment.CurrentDirectory, args[3]);
+
+      new GiccCore(Environment.CurrentDirectory, absVobPath, branchName, absRepoPath).Clone();
     }
 
     private static void Label(string[] args)

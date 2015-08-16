@@ -56,36 +56,39 @@ namespace Gicc.Lib
     }
 
     /// <summary>
-    /// Gets or sets ClearCase's absolute VOB path.
-    /// Clone 호출 시 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
-    /// </summary>
-    internal string VobPath { get; set; }
-
-    /// <summary>
     /// Gets or sets ClearCase and Git's branch name.
-    /// Clone 호출 시 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
+    /// Clone 호출 시 생성자 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
     /// </summary>
     internal string BranchName { get; set; }
 
     /// <summary>
+    /// Gets or sets ClearCase's absolute VOB path.
+    /// Clone 호출 시 생성자 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
+    /// </summary>
+    internal string VobPath { get; set; }
+
+    /// <summary>
     /// Gets or sets Git's absolute repository path.
-    /// Clone 호출 시 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
+    /// Clone 호출 시 생성자 매개변수로 주어지고, Pull 또는 Push 호출 시 config 파일에서 읽어 온다.
     /// </summary>
     internal string RepoPath { get; set; }
 
     public void Clone()
     {
-      // todo : init git
-      
+      Git git = new Git(CreateGitInfo());
+
+      git.Init();
+
+      // move to git repository.
+      CWD = git.RepoPath;
+
       WriteConfig();
 
-      // todo : 최초 브랜치 checkin 지점 직전 snapshot 복사
+      CopyMainBranchBeforeFirstBranchCheckin(BranchName);
       
       // todo : pull tag
       
       // todo : pull
-
-      throw new NotImplementedException();
     }
 
     public void Pull()
@@ -150,7 +153,7 @@ namespace Gicc.Lib
       git.Checkout("master");
 
       List<string> mainFileList = mainCC.FindAllFilesInBranch(since, until);
-      CopyFromVOBToRepo(mainFileList);
+      CopyFilesFromVOBToRepo(mainFileList);
 
       git.AddCommit("gicc", author);
       git.TagPull(); // todo : if changed
@@ -163,7 +166,7 @@ namespace Gicc.Lib
         .Where(elemVer => elemVer.CreatedDate > since && elemVer.CreatedDate <= until) // todo : pull 에서 날짜 제한 걸어주면 필요 없을 듯
         .Select(elemVer => elemVer.ElementName).ToList()
         .Distinct().ToList();
-      CopyFromVOBToRepo(branchFileList);
+      CopyFilesFromVOBToRepo(branchFileList);
 
       git.AddCommit("gicc", author);
       git.TagPull(); // todo : if changed
@@ -203,7 +206,35 @@ namespace Gicc.Lib
       return resultCommitPoints;
     }
 
-    private void CopyFromVOBToRepo(List<string> mainFileList)
+    /// <summary>
+    /// 대상 브렌치에서 첫 번째 체크인이 일어나기 직전 상태의 메인 브렌치 파일들을 복사합니다.
+    /// </summary>
+    private void CopyMainBranchBeforeFirstBranchCheckin(string branchName)
+    {
+      ClearCase main = new ClearCase(CreateCCInfo("main"));
+      ClearCase branch = new ClearCase(CreateCCInfo(branchName));
+      
+      List<CCElementVersion> branchVerList = branch.GetAllVersionsInBranch();
+      branchVerList.Sort(CCElementVersion.CompareVersionsByCreatedDate);
+
+      DateTime firstCheckinDate = branchVerList[0].CreatedDate;
+
+      main.SetMainCS(firstCheckinDate.AddSeconds(-1));
+
+      CopyVOBIntoRepo();
+    }
+    
+    /// <summary>
+    /// VOB 의 파일들을 Repository 로 복사 합니다. gitignore 에 있는 파일들은 복사하지 않습니다.
+    /// </summary>
+    private void CopyVOBIntoRepo()
+    {
+      Git git = new Git(CreateGitInfo());
+
+      throw new NotImplementedException();
+    }
+
+    private void CopyFilesFromVOBToRepo(List<string> mainFileList)
     {
       Git git = new Git(CreateGitInfo());
 
@@ -251,7 +282,7 @@ namespace Gicc.Lib
     /// cc 실행 정보.
     /// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
     /// </summary>
-    /// <param name="branchName"></param>
+    /// <param name="branchName">브랜치 이름입니다. main 또는 작업 중 branch 가 됩니다.</param>
     private ClearCaseConstructInfo CreateCCInfo(string branchName)
     {
       return new ClearCaseConstructInfo()
