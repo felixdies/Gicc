@@ -14,6 +14,8 @@ namespace Gicc.Test
   {
     [TestCase("build/", @".builds", true)]
     [TestCase("*.suo", @"0.suo", true)]
+    [TestCase("*.suo", @"sub\0.suo", true)]
+    [TestCase("*.suo", @"sub/0.suo", true)]
     [TestCase("*.sln.docstates", @"0.sln.docstates", true)]
     [TestCase("*.ide/", @"0.ide\0", true)]
     [TestCase("*.ide/", @"0.sln.ide\0", true)]
