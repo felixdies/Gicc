@@ -8,7 +8,7 @@ using System.IO;
 using System.Configuration;
 
 using NUnit.Framework;
-using Gicc;
+using Gicc.Lib;
 
 namespace Gicc.Test
 {
@@ -274,7 +274,7 @@ namespace Gicc.Test
 			Directory.CreateDirectory(Path.Combine(REPO_MOCKUP_PATH, @".git/gicc"));
 
 			Environment.CurrentDirectory = REPO_MOCKUP_PATH;
-			new Gicc(REPO_MOCKUP_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_MOCKUP_PATH).WriteConfig();
+			new GiccCore(REPO_MOCKUP_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_MOCKUP_PATH).WriteConfig();
 
 			git.Init();
 			File.WriteAllText(tt, string.Empty);

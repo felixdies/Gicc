@@ -8,7 +8,7 @@ using System.IO;
 using System.Configuration;
 
 using NUnit.Framework;
-using Gicc;
+using Gicc.Lib;
 
 namespace Gicc.Test
 {

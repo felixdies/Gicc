@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using System.IO;
 
 using NUnit.Framework;
-using Gicc;
+using Gicc.Lib;
 
 namespace Gicc.Test
 {
 	[TestFixture]
-	public class GiccTest : GiccTestBase
+	public class GiccCoreTest : GiccTestBase
 	{
 		[Test]
 		public void WriteAndParseConfigTest()
@@ -20,10 +20,10 @@ namespace Gicc.Test
 			Environment.CurrentDirectory = REPO_PATH;
 
 			// write configs
-			new Gicc(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH).WriteConfig();
+			new GiccCore (REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH).WriteConfig();
 
 			// parse configs
-			Gicc gicc = new Gicc(Environment.CurrentDirectory);
+			GiccCore gicc = new GiccCore(Environment.CurrentDirectory);
 
 			Assert.AreEqual(CC_TEST_PATH, gicc.VobPath);
 			Assert.AreEqual(BRANCH_NAME, gicc.BranchName);
@@ -36,7 +36,7 @@ namespace Gicc.Test
 			CreateGitTestMockUp();
 			// setup
 
-			Gicc gicc = new Gicc(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH);
+			GiccCore gicc = new GiccCore(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH);
 			Git git = new Git(GitInfo);
 
 			gicc.CopyAndCommit(CCMockupHistoryList, git.GetLastGiccPull(), DateTime.Now);
@@ -49,7 +49,7 @@ namespace Gicc.Test
 			DateTime commitPoint = new DateTime(2015, 4, 1, 1, 0, 0);
 
 			List<DateTime> expected = new List<DateTime>();
-			List<DateTime> actual = new Gicc(REPO_PATH).GetCommitPoints(CCMockupHistoryList);
+			List<DateTime> actual = new GiccCore(REPO_PATH).GetCommitPoints(CCMockupHistoryList);
 
 			expected.Add(commitPoint.AddMinutes(0));
 			expected.Add(commitPoint.AddMinutes(2));

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Gicc
+namespace Gicc.Lib
 {
   public abstract class Executor
   {

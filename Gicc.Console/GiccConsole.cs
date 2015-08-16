@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Gicc;
+using Gicc.Lib;
 
 namespace Gicc.Console
 {
@@ -26,15 +26,15 @@ namespace Gicc.Console
       switch (args[0].ToLower())
       {
         case "clone":
-          new Gicc(Environment.CurrentDirectory, args[1], args[2], args[3]).Clone();
+          new GiccCore(Environment.CurrentDirectory, args[1], args[2], args[3]).Clone();
           break;
 
         case "pull":
-          new Gicc(Environment.CurrentDirectory).Pull();
+          new GiccCore(Environment.CurrentDirectory).Pull();
           break;
 
         case "push":
-          new Gicc(Environment.CurrentDirectory).Push();
+          new GiccCore(Environment.CurrentDirectory).Push();
           break;
 
         case "list":
@@ -114,7 +114,7 @@ namespace Gicc.Console
           break;
         /*
         case 3:
-          new Gicc(Environment.CurrentDirectory, args[2]).SetBranchCS();
+          new GiccCore(Environment.CurrentDirectory, args[2]).SetBranchCS();
           break;
         */
         default:

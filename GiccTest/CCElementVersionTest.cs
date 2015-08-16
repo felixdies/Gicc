@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Configuration;
 
 using NUnit.Framework;
+using Gicc.Lib;
 
 namespace Gicc.Test
 {

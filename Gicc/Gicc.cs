@@ -5,16 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Gicc
+namespace Gicc.Lib
 {
-  public class Gicc
+  public class GiccCore
   {
     /// <summary>
-    /// Initializes a new instance of the <see cref="Gicc" /> class.
+    /// Initializes a new instance of the <see cref="GiccCore" /> class.
     /// Clone 이외 명령어 실행 시 호출되는 생성자.
     /// </summary>
     /// <param name="cwd"></param>
-    public Gicc(string cwd)
+    public GiccCore(string cwd)
     {
       this.CWD = cwd;
 
@@ -22,14 +22,14 @@ namespace Gicc
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Gicc" /> class.
+    /// Initializes a new instance of the <see cref="GiccCore" /> class.
     /// Clone 명령어 실행 시 호출되는 생성자.
     /// </summary>
     /// <param name="cwd"></param>
     /// <param name="absVobPath"></param>
     /// <param name="branchName"></param>
     /// <param name="absRepoPath"></param>
-    public Gicc(string cwd, string absVobPath, string branchName, string absRepoPath)
+    public GiccCore(string cwd, string absVobPath, string branchName, string absRepoPath)
     {
       this.CWD = cwd;
       this.VobPath = absVobPath;
