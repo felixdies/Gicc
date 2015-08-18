@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 using NUnit.Framework;
 using Gicc.Lib;
@@ -28,13 +29,28 @@ namespace Gicc.Test
     [TestCase(@"Testresult1/0", true)]
 		[TestCase(@"file", false)]
     [TestCase(@"dir\0", false)]
-    public void FnMatch(string path, bool expectedResult)
+    public void IsIgnoredFileTest(string path, bool expectedResult)
     {
-      string[] ignoreArr = Resource.GetResource(Resource.GetResource("gitignore.txt")).Split('\n');
+      string gitignore = Resource.GetResource("gitignore.txt");
+      string[] ignoreArr = gitignore.Split(new string[] { "\r\n" },StringSplitOptions.RemoveEmptyEntries);
 
       GitIgnore gitIgnore = new GitIgnore(ignoreArr);
 
       Assert.AreEqual(expectedResult, gitIgnore.IsIgnoredFile(path));
+    }
+
+    [TestCase("", "", typeof(ArgumentException))]
+    [TestCase("suo", ".*suo", null)]
+    public void GlobPatternToRegexTest(string globPatt, string expectedRegex, Type expectedException)
+    {
+      if (expectedException != null)
+      {
+        Assert.Catch(expectedException, () => new GitIgnore().GlobPatternToRegex(globPatt));
+        return;
+      }
+
+      Regex actualRegex = new GitIgnore().GlobPatternToRegex(globPatt);
+      Assert.AreEqual(expectedRegex, actualRegex.ToString());
     }
   }
 }

@@ -8,17 +8,21 @@ namespace Gicc
 {
   internal class GitIgnore
   {
-    List<Regex> ignoreDirList;
-    List<Regex> unIgnoreDirList;
-    List<Regex> ignoreFileList;
-    List<Regex> unIgnoreFileList;
+    List<Regex> ignoredDirList;
+    List<Regex> unIgnoredDirList;
+    List<Regex> ignoredFileList;
+    List<Regex> unIgnoredFileList;
+
+    internal GitIgnore()
+    {
+    }
 
     internal GitIgnore(string[] ignoredPatternArr)
     {
-      ignoreFileList = new List<Regex>();
-      unIgnoreFileList = new List<Regex>();
-      ignoreDirList = new List<Regex>();
-      unIgnoreDirList = new List<Regex>();
+      ignoredFileList = new List<Regex>();
+      unIgnoredFileList = new List<Regex>();
+      ignoredDirList = new List<Regex>();
+      unIgnoredDirList = new List<Regex>();
 
       ParseIgnoredPatternArr(ignoredPatternArr);
     }
@@ -35,7 +39,7 @@ namespace Gicc
         dirPath = "\\" + dirPath;
       }
 
-      foreach (Regex unIgnoreDir in unIgnoreDirList)
+      foreach (Regex unIgnoreDir in unIgnoredDirList)
       {
         Match m = unIgnoreDir.Match(dirPath);
         if (m.Success && m.Length == dirPath.Length)
@@ -44,7 +48,7 @@ namespace Gicc
         }
       }
 
-      foreach (Regex ignoreDir in ignoreDirList)
+      foreach (Regex ignoreDir in ignoredDirList)
       {
         Match m = ignoreDir.Match(dirPath);
         if (m.Success && m.Length == dirPath.Length)
@@ -68,7 +72,7 @@ namespace Gicc
         filePath = "\\" + filePath;
       }
 
-      foreach (Regex unIgnoreFile in unIgnoreFileList)
+      foreach (Regex unIgnoreFile in unIgnoredFileList)
       {
         Match m = unIgnoreFile.Match(filePath);
         if (m.Success && m.Length == filePath.Length)
@@ -77,7 +81,7 @@ namespace Gicc
         }
       }
 
-      foreach (Regex ignoreFile in ignoreFileList)
+      foreach (Regex ignoreFile in ignoredFileList)
       {
         Match m = ignoreFile.Match(filePath);
         if (m.Success && m.Length == filePath.Length)
@@ -101,29 +105,34 @@ namespace Gicc
         {
           if (patt.EndsWith("/"))
           {
-            this.unIgnoreDirList.Add(GlobPatternToRegex(patt.Substring(1)));
+            this.unIgnoredDirList.Add(GlobPatternToRegex(patt.Substring(1)));
           }
           else
           {
-            this.unIgnoreFileList.Add(GlobPatternToRegex(patt.Substring(1)));
+            this.unIgnoredFileList.Add(GlobPatternToRegex(patt.Substring(1)));
           }
         }
         else
         {
           if (patt.EndsWith("/"))
           {
-            this.ignoreDirList.Add(GlobPatternToRegex(patt));
+            this.ignoredDirList.Add(GlobPatternToRegex(patt));
           }
           else
           {
-            this.ignoreFileList.Add(GlobPatternToRegex(patt));
+            this.ignoredFileList.Add(GlobPatternToRegex(patt));
           }
         }
       }
     }
 
-    private Regex GlobPatternToRegex(string globPatt)
+    internal Regex GlobPatternToRegex(string globPatt)
     {
+      if (globPatt == string.Empty)
+      {
+        throw new ArgumentException("globPatt is empty.");
+      }
+
       // 1. escape
       string patt = Regex.Escape(globPatt);
 
@@ -143,8 +152,7 @@ namespace Gicc
 
       // 4. parse asterisks
 
-
-      return null;
+      return new Regex(patt);
     }
   }
 }
