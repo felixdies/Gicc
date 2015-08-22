@@ -124,15 +124,6 @@ namespace Gicc.Lib
       Execute("tag -f gicc_pull");
     }
 
-    internal List<bool> IsIgnoredList(List<string> fileNameList)
-    {
-      List<string> argList = fileNameList.Select(filename => "check-ignore " + filename).ToList();
-      List<string> executeResultList = GetExecutedResultListWithoutFIO(argList);
-
-      // result is not empty if the file is ignored
-      return executeResultList.Select(result => !string.IsNullOrWhiteSpace(result)).ToList();
-    }
-
     internal void Checkout(string branch)
     {
       if (!GetBranchList().Any(existBranch => existBranch.Contains(branch)))

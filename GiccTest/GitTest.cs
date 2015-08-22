@@ -84,52 +84,5 @@ namespace Gicc.Test
 			// cleanup
 			File.WriteAllText(TT_PATH, stored);
 		}
-
-		[Test]
-		public void IsIgnoredListTest()
-		{
-			// setup
-			Git git = new Git(GitInfo);
-			git.Init();
-      File.WriteAllText(Path.Combine(REPO_PATH, ".gitignore"), Resource.GetResource("gitignore.txt"));
-			// setup
-
-			Dictionary<string, bool> ignoredList = new Dictionary<string, bool>()
-			{
-				{@".builds", true},
-				{@"0.suo", true},
-				{@"0.sln.docstates", true},
-				{@"0.ide\0", true},
-				{@"0.sln.ide\0", true},
-				{@"debug\0", true},
-				{@"Debug\0", true},
-				{@"x86\0", true},
-				{@"testresult\0", true},
-				{@"testresult1\0", true},
-				{@"testResult\0", true},
-				{@"Testresult1\0", true},
-				{@"file", false},
-				{@"dir\0", false}
-			};
-
-			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-
-			Console.WriteLine("start IsGitIgnoredTest()");
-			sw.Start();
-
-			List<string> fileNameList = new List<string>();
-			List<bool> isIgnoredList = new List<bool>();
-
-			foreach (KeyValuePair<string, bool> pair in ignoredList)
-			{
-				fileNameList.Add(pair.Key);
-				isIgnoredList.Add(pair.Value);
-			}
-
-			Assert.That(git.IsIgnoredList(fileNameList), Is.EquivalentTo(isIgnoredList));
-
-			sw.Stop();
-			Console.WriteLine("end IsGitIgnoredTest(). Elapsed time : " + sw.Elapsed);
-		}
 	}
 }
