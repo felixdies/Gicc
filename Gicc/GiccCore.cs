@@ -73,6 +73,22 @@ namespace Gicc.Lib
     /// </summary>
     internal string RepoPath { get; set; }
 
+    private GitIgnore _gitIgnore = null;
+
+    internal GitIgnore GitIgnore
+    {
+      get
+      {
+        if (_gitIgnore == null)
+        {
+          string[] gitIgnoreTextArr = File.ReadAllLines(Path.Combine(RepoPath, ".gitignore"));
+          _gitIgnore = new GitIgnore(gitIgnoreTextArr);
+        }
+        
+        return _gitIgnore;
+      }
+    }
+
     public void Clone()
     {
       Git git = new Git(CreateGitInfo());
@@ -158,7 +174,7 @@ namespace Gicc.Lib
       git.Checkout("master");
 
       List<string> mainFileList = mainCC.FindAllFilesInBranch(since, until);
-      CopyFiles(mainFileList, VobPath, RepoPath, git.GitIgnore);
+      CopyFiles(mainFileList, VobPath, RepoPath);
       
       git.AddCommit("gicc", author);
       git.TagPull(); // todo : if changed
@@ -171,19 +187,19 @@ namespace Gicc.Lib
         .Where(elemVer => elemVer.CreatedDate > since && elemVer.CreatedDate <= until) // todo : pull 에서 날짜 제한 걸어주면 필요 없을 듯
         .Select(elemVer => elemVer.ElementName).ToList()
         .Distinct().ToList();
-      CopyFiles(branchFileList, VobPath, RepoPath, git.GitIgnore);
+      CopyFiles(branchFileList, VobPath, RepoPath);
 
       git.AddCommit("gicc", author);
       git.TagPull(); // todo : if changed
     }
 
-    private void CopyFiles(List<string> fileList, string srcRootPath, string destRootPath, GitIgnore gitIgnore)
+    private void CopyFiles(List<string> fileList, string srcRootPath, string destRootPath)
     {
       foreach (string absFilePath in fileList)
       {
         string relFilePath = MakeRelative(absFilePath, srcRootPath);
 
-        if (gitIgnore.IsIgnoredFile(relFilePath) == false)
+        if (GitIgnore.IsIgnoredFile(relFilePath) == false)
         {
           File.Copy(absFilePath, Path.Combine(destRootPath, relFilePath), true);
         }
@@ -250,12 +266,17 @@ namespace Gicc.Lib
       // Get the subdirectories for the specified directory.
       DirectoryInfo dir = new DirectoryInfo(sourceDirName);
       DirectoryInfo[] dirs = dir.GetDirectories();
-
+      
       if (!dir.Exists)
       {
         throw new DirectoryNotFoundException(
             "Source directory does not exist or could not be found: "
             + sourceDirName);
+      }
+
+      if (GitIgnore.IsIgnoredDir(MakeRelative(sourceDirName)))
+      {
+        return;
       }
 
       // If the destination directory doesn't exist, create it. 
@@ -269,7 +290,10 @@ namespace Gicc.Lib
       foreach (FileInfo file in files)
       {
         string temppath = Path.Combine(destDirName, file.Name);
-        file.CopyTo(temppath, false);
+        if (GitIgnore.IsIgnoredFile(MakeRelative(file.FullName)) == false)
+        {
+          file.CopyTo(temppath, true);
+        }
       }
 
       // If copying subdirectories, copy them and their contents to new location. 
@@ -279,7 +303,7 @@ namespace Gicc.Lib
         CopyDirectory(subdir.FullName, temppath);
       }
     }
-
+    
     private void ParseAllConfigsFromConfigFile()
     {
       if (!File.Exists(ConfigPath))
@@ -292,10 +316,38 @@ namespace Gicc.Lib
       RepoPath = ParseConfigFromConfigFile("repository");
     }
 
+    /// <summary>
+    /// 주어진 path 에 VOB/Repo path 가 포함 된 경우, VOB/Repo 로부터의 상대 경로를 반환 합니다.
+    /// 주어진 path 에 VOB/Repo path 가 포함되지 않은 경우, 주어진 path 를 그대로 반환 합니다.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    internal string MakeRelative(string path)
+    {
+      Uri uri = new Uri(path);
+      Uri vobUri = new Uri(VobPath + "\\");
+      Uri repoUri = new Uri(RepoPath + "\\");
+
+      bool b = vobUri.IsFile;
+
+      if (vobUri.IsBaseOf(uri))
+      {
+        return MakeRelative(path, VobPath);
+      }
+      else if (repoUri.IsBaseOf(uri))
+      {
+        return MakeRelative(path, RepoPath);
+      }
+      else
+      {
+        return path;
+      }
+    }
+
     private string MakeRelative(string filePath, string rootPath)
     {
-      var fileUri = new Uri(filePath);
-      var rootUri = new Uri(rootPath);
+      Uri fileUri = new Uri(filePath);
+      Uri rootUri = new Uri(rootPath);
       return rootUri.MakeRelativeUri(fileUri).ToString();
     }
 

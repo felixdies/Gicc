@@ -30,6 +30,20 @@ namespace Gicc.Test
 			Assert.AreEqual(REPO_PATH, gicc.RepoPath);
 		}
 
+    [Test]
+    public void MakeRelativeTest()
+    {
+      GiccCore gicc = new GiccCore(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH);
+      string path = Path.Combine(REPO_PATH, "test");
+      Assert.AreEqual("test", gicc.MakeRelative(path));
+      
+      path = Path.Combine(CC_TEST_PATH, "test");
+      Assert.AreEqual("test", gicc.MakeRelative(path));
+
+      path = "test";
+      Assert.AreEqual("test", gicc.MakeRelative(path));
+    }
+
 		[Test]
 		public void CopyAndCommitTest()
 		{

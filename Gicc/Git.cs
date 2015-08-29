@@ -26,7 +26,7 @@ namespace Gicc.Lib
       get { return "git"; }
     }
 
-    internal GitIgnore _gitIgnore = null;
+    private GitIgnore _gitIgnore = null;
 
     internal GitIgnore GitIgnore
     {
@@ -41,7 +41,6 @@ namespace Gicc.Lib
         return _gitIgnore;
       }
     }
-
 
     /// <summary>
     /// Gets or sets absolute repository path.
