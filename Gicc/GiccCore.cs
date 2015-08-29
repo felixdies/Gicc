@@ -11,7 +11,7 @@ namespace Gicc.Lib
   {
     /// <summary>
     /// Initializes a new instance of the <see cref="GiccCore" /> class.
-    /// Clone 이외 명령어 실행 시 호출되는 생성자.
+    /// Clone 이외 명령어 실행 시 호출되는 생성자. Config 파일에서 branch name, CC VOB path, git repository path 를 읽어 온다.
     /// </summary>
     /// <param name="cwd"></param>
     public GiccCore(string cwd)

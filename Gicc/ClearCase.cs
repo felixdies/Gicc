@@ -287,7 +287,7 @@ namespace Gicc.Lib
     {
       List<CCElementVersion> resultList = new List<CCElementVersion>();
 
-      foreach(string file in FindAllFilesInBranch())
+      foreach (string file in FindAllFilesInBranch())
       {
         resultList.AddRange(Lshistory(file));
       }

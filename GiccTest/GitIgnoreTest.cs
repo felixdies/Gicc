@@ -41,6 +41,10 @@ namespace Gicc.Test
     [TestCase(@"sub\0.suo", true)]
     [TestCase(@"sub/0.suo", true)]
     [TestCase(@"0.sln.docstates", true)]
+    [TestCase(@"testresult\0", true)]
+    [TestCase(@"testresult1/0", true)]
+    [TestCase(@"sub/testResult/0", true)]
+    [TestCase(@"sub\Testresult1\0", true)]
 		[TestCase(@"file", false)]
     public void IsIgnoredFileTest(string path, bool expectedResult)
     {
@@ -58,11 +62,11 @@ namespace Gicc.Test
     {
       if (expectedException != null)
       {
-        Assert.Catch(expectedException, () => new GitIgnore().GlobPatternToRegex(globPatt));
+        Assert.Catch(expectedException, () => GitIgnore.GlobPatternToRegex(globPatt));
         return;
       }
 
-      Regex actualRegex = new GitIgnore().GlobPatternToRegex(globPatt);
+      Regex actualRegex = GitIgnore.GlobPatternToRegex(globPatt);
       Assert.AreEqual(expectedRegex, actualRegex.ToString());
     }
   }

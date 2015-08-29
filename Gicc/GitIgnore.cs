@@ -13,10 +13,6 @@ namespace Gicc
     List<Regex> ignoredFileList;
     List<Regex> unIgnoredFileList;
 
-    internal GitIgnore()
-    {
-    }
-
     internal GitIgnore(string[] ignoredPatternArr)
     {
       ignoredFileList = new List<Regex>();
@@ -68,8 +64,6 @@ namespace Gicc
 
     /// <summary>
     /// 주어진 파일 경로가 .gitignore 파일에 설정 돼 있는 지 여부를 반환합니다.
-    /// 파일 경로만을 체크하므로, .gitignore 파일에 폴더 단위로 설정 된 ignore 는 적용하지 않습니다.
-    /// 폴더 단위로 설정 된 ignore 여부를 체크 하려면 IsIgnoredDir 메서드를 이용해야 합니다.
     /// </summary>
     /// <param name="relFilePath">relative file path</param>
     /// <returns></returns>
@@ -84,6 +78,25 @@ namespace Gicc
       else if (relFilePath.StartsWith("\\"))
       {
         relFilePath = relFilePath.Substring(2);
+      }
+
+      // 현재 파일이 있는 폴더가 .gitignore 에 선언되어 있는 지 검사
+      // 주어지는 경로가 '/' 와 '\' 를 혼용하는 경우는 없다고 가정.
+      if (relFilePath.Contains('/'))
+      {
+        string relDirPath = relFilePath.Substring(0, relFilePath.LastIndexOf('/'));
+        if (IsIgnoredDir(relDirPath))
+        {
+          return true;
+        }
+      }
+      else if (relFilePath.Contains('\\'))
+      {
+        string relDirPath = relFilePath.Substring(0, relFilePath.LastIndexOf('\\'));
+        if (IsIgnoredDir(relDirPath))
+        {
+          return true;
+        }
       }
 
       foreach (Regex unIgnoreFile in unIgnoredFileList)
@@ -145,7 +158,7 @@ namespace Gicc
     /// </summary>
     /// <param name="globPatt"></param>
     /// <returns></returns>
-    internal Regex GlobPatternToRegex(string globPatt)
+    internal static Regex GlobPatternToRegex(string globPatt)
     {
       bool startsWithSlash = false;
 
@@ -197,7 +210,7 @@ namespace Gicc
     /// </summary>
     /// <param name="globPatt"></param>
     /// <returns></returns>
-    private string EscapeRegex(string globPatt)
+    private static string EscapeRegex(string globPatt)
     {
       string escapedPatt = Regex.Escape(globPatt);
 
