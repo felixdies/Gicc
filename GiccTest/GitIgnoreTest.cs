@@ -43,8 +43,8 @@ namespace Gicc.Test
     [TestCase(@"0.sln.docstates", true)]
     [TestCase(@"testresult\0", true)]
     [TestCase(@"testresult1/0", true)]
-    [TestCase(@"sub/testResult/0", true)]
-    [TestCase(@"sub\Testresult1\0", true)]
+    [TestCase(@"sub/testResult\0", true)]
+    [TestCase(@"sub\Testresult1/0", true)]
 		[TestCase(@"file", false)]
     public void IsIgnoredFileTest(string path, bool expectedResult)
     {

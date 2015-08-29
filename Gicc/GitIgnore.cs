@@ -81,22 +81,10 @@ namespace Gicc
       }
 
       // 현재 파일이 있는 폴더가 .gitignore 에 선언되어 있는 지 검사
-      // 주어지는 경로가 '/' 와 '\' 를 혼용하는 경우는 없다고 가정.
-      if (relFilePath.Contains('/'))
+      string parentDir = System.IO.Path.GetDirectoryName(relFilePath);
+      if (IsIgnoredDir(parentDir))
       {
-        string relDirPath = relFilePath.Substring(0, relFilePath.LastIndexOf('/'));
-        if (IsIgnoredDir(relDirPath))
-        {
-          return true;
-        }
-      }
-      else if (relFilePath.Contains('\\'))
-      {
-        string relDirPath = relFilePath.Substring(0, relFilePath.LastIndexOf('\\'));
-        if (IsIgnoredDir(relDirPath))
-        {
-          return true;
-        }
+        return true;
       }
 
       foreach (Regex unIgnoreFile in unIgnoredFileList)
