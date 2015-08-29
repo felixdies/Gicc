@@ -28,8 +28,8 @@ namespace Gicc.Test
     [TestCase(@"0/1/packages/build", false)]
     public void IsIgnoredDirTest(string path, bool expectedResult)
     {
-      string gitignore = Resource.GetResource("gitignore.txt");
-      string[] ignoreArr = gitignore.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+      string gitIgnoreText = Resource.GetResource("gitignore.txt");
+      string[] ignoreArr = gitIgnoreText.Split(new string[] { "\r\n" }, StringSplitOptions.None);
 
       GitIgnore gitIgnore = new GitIgnore(ignoreArr);
 
@@ -48,8 +48,8 @@ namespace Gicc.Test
 		[TestCase(@"file", false)]
     public void IsIgnoredFileTest(string path, bool expectedResult)
     {
-      string gitignore = Resource.GetResource("gitignore.txt");
-      string[] ignoreArr = gitignore.Split(new string[] { "\r\n" },StringSplitOptions.RemoveEmptyEntries);
+      string gitIgnoreText = Resource.GetResource("gitignore.txt");
+      string[] ignoreArr = gitIgnoreText.Split(new string[] { "\r\n" }, StringSplitOptions.None);
 
       GitIgnore gitIgnore = new GitIgnore(ignoreArr);
 

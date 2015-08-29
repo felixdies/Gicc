@@ -26,6 +26,23 @@ namespace Gicc.Lib
       get { return "git"; }
     }
 
+    internal GitIgnore _gitIgnore = null;
+
+    internal GitIgnore GitIgnore
+    {
+      get
+      {
+        if (_gitIgnore == null)
+        {
+          string[] gitIgnoreTextArr = File.ReadAllLines(Path.Combine(ExecutingPath, ".gitignore"));
+          _gitIgnore = new GitIgnore(gitIgnoreTextArr);
+        }
+        
+        return _gitIgnore;
+      }
+    }
+
+
     /// <summary>
     /// Gets or sets absolute repository path.
     /// </summary>

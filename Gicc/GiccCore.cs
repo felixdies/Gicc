@@ -107,7 +107,7 @@ namespace Gicc.Lib
       List<DateTime> commitPoints = GetCommitPoints(ccHistory);
       for (int i = 0; i < commitPoints.Count - 2; i++)
       {
-        CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]); // todo: pull tag 가 since 가 돼야 함
+        CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]); // todo: pull/push tag 가 since 가 돼야 함
       }
 
       throw new NotImplementedException();
@@ -116,6 +116,11 @@ namespace Gicc.Lib
     public void Push()
     {
       throw new NotImplementedException();
+
+      // 1. find commited files after last pull/push tag
+      // 2. pull & merge
+      // 3. checkout & copy commited files
+      // 4. tag "push"
     }
 
     public List<string> ListCCFilesOnBranch(string branchName)
@@ -153,8 +158,8 @@ namespace Gicc.Lib
       git.Checkout("master");
 
       List<string> mainFileList = mainCC.FindAllFilesInBranch(since, until);
-      CopyFilesFromVOBToRepo(mainFileList);
-
+      CopyFiles(mainFileList, VobPath, RepoPath, git.GitIgnore);
+      
       git.AddCommit("gicc", author);
       git.TagPull(); // todo : if changed
 
@@ -166,10 +171,23 @@ namespace Gicc.Lib
         .Where(elemVer => elemVer.CreatedDate > since && elemVer.CreatedDate <= until) // todo : pull 에서 날짜 제한 걸어주면 필요 없을 듯
         .Select(elemVer => elemVer.ElementName).ToList()
         .Distinct().ToList();
-      CopyFilesFromVOBToRepo(branchFileList);
+      CopyFiles(branchFileList, VobPath, RepoPath, git.GitIgnore);
 
       git.AddCommit("gicc", author);
       git.TagPull(); // todo : if changed
+    }
+
+    private void CopyFiles(List<string> fileList, string srcRootPath, string destRootPath, GitIgnore gitIgnore)
+    {
+      foreach (string absFilePath in fileList)
+      {
+        string relFilePath = MakeRelative(absFilePath, srcRootPath);
+
+        if (gitIgnore.IsIgnoredFile(relFilePath) == false)
+        {
+          File.Copy(absFilePath, Path.Combine(destRootPath, relFilePath), true);
+        }
+      }
     }
 
     /// <summary>
@@ -221,27 +239,44 @@ namespace Gicc.Lib
 
       main.SetMainCS(firstCheckinDate.AddSeconds(-1));
 
-      CopyVOBIntoRepo();
+      CopyDirectory(VobPath, RepoPath);
     }
-    
+
     /// <summary>
-    /// VOB 의 파일들을 Repository 로 복사 합니다. gitignore 에 있는 파일들은 복사하지 않습니다.
+    /// sourceDirName 의 하위 폴더 및 파일을 destDirName 로 복사 합니다. gitignore 에 있는 파일들은 복사하지 않습니다.
     /// </summary>
-    private void CopyVOBIntoRepo()
+    private void CopyDirectory(string sourceDirName, string destDirName)
     {
-      Git git = new Git(CreateGitInfo());
+      // Get the subdirectories for the specified directory.
+      DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+      DirectoryInfo[] dirs = dir.GetDirectories();
 
-      throw new NotImplementedException();
-    }
-
-    private void CopyFilesFromVOBToRepo(List<string> mainFileList)
-    {
-      Git git = new Git(CreateGitInfo());
-
-      foreach (string relativeFilePath in mainFileList)
+      if (!dir.Exists)
       {
-        ////if (!git.IsIgnored(relativeFilePath))
-        ////File.Copy(Path.Combine(VobPath, relativeFilePath), Path.Combine(RepoPath, relativeFilePath), true);
+        throw new DirectoryNotFoundException(
+            "Source directory does not exist or could not be found: "
+            + sourceDirName);
+      }
+
+      // If the destination directory doesn't exist, create it. 
+      if (!Directory.Exists(destDirName))
+      {
+        Directory.CreateDirectory(destDirName);
+      }
+
+      // Get the files in the directory and copy them to the new location.
+      FileInfo[] files = dir.GetFiles();
+      foreach (FileInfo file in files)
+      {
+        string temppath = Path.Combine(destDirName, file.Name);
+        file.CopyTo(temppath, false);
+      }
+
+      // If copying subdirectories, copy them and their contents to new location. 
+      foreach (DirectoryInfo subdir in dirs)
+      {
+        string temppath = Path.Combine(destDirName, subdir.Name);
+        CopyDirectory(subdir.FullName, temppath);
       }
     }
 
@@ -255,6 +290,13 @@ namespace Gicc.Lib
       VobPath = ParseConfigFromConfigFile("vob");
       BranchName = ParseConfigFromConfigFile("branch");
       RepoPath = ParseConfigFromConfigFile("repository");
+    }
+
+    private string MakeRelative(string filePath, string rootPath)
+    {
+      var fileUri = new Uri(filePath);
+      var rootUri = new Uri(rootPath);
+      return rootUri.MakeRelativeUri(fileUri).ToString();
     }
 
     private string ParseConfigFromConfigFile(string configName)
