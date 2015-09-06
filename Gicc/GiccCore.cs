@@ -134,20 +134,44 @@ namespace Gicc.Lib
       Git git = new Git(CreateGitInfo());
       ClearCase cc = new ClearCase(CreateCCInfo(this.BranchName));
 
+      // 1. validateion
       cc.CheckCheckedoutFileIsNotExist();
       git.CheckModifiedFileIsNotExist();
 
-      // 1. find commited files after last pull/push tag
-      git.GetCommittedFilesAfterLastPP();
-
       // 2. pull & merge
 
-
-      // 3. checkout & copy commited files
-
+      // 3. copy commited files after last pull/push tag & checkin
+      CopyAndCheckin(git.GetCommittedFilesAfterLastPP()
+        , "checked in with gicc" + Environment.NewLine + "-git commit id : " + git.GetHeadCommitId());
 
       // 4. tag "push"
       git.TagPull();
+    }
+
+    internal void CopyAndCheckin(Dictionary<string, FileChangeType> committedFileDic, string checkInComment)
+    {
+      ClearCase cc = new ClearCase(CreateCCInfo(this.BranchName));
+
+      foreach (KeyValuePair<string, FileChangeType> kvp in committedFileDic)
+      {
+        switch (kvp.Value)
+        {
+          case FileChangeType.Creation:
+            File.Copy(Path.Combine(RepoPath, kvp.Key), Path.Combine(VobPath, kvp.Key), false);
+            cc.CheckIn(Path.Combine(VobPath, kvp.Key), checkInComment);
+            break;
+          case FileChangeType.Modification:
+            cc.Checkout(kvp.Key);
+            File.Copy(Path.Combine(RepoPath, kvp.Key), Path.Combine(VobPath, kvp.Key), true);
+            cc.CheckIn(Path.Combine(VobPath, kvp.Key), checkInComment);
+            break;
+          case FileChangeType.Delete:
+            // 구현하지 않을 예정.
+            break;
+          default:
+            throw new InvalidOperationException("Git 파일 변경 사항은 추가, 수정, 삭제 중 하나여야 합니다.");
+        }
+      }
     }
 
     public List<string> ListCCFilesOnBranch(string branchName)

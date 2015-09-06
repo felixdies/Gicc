@@ -67,7 +67,7 @@ namespace Gicc.Lib
       return GetExecutedResultList("branch");
     }
 
-    internal DateTime GetLastGiccPull()
+    internal DateTime GetLastGiccPullDate()
     {
       string lastPulledCommit = GetExecutedResult("show-ref --tags gicc_pull");
 
@@ -155,11 +155,16 @@ namespace Gicc.Lib
       return GetExecutedResult("help");
     }
 
+    internal string GetHeadCommitId()
+    {
+      return GetExecutedResult("git rev-list head -1");
+    }
+
     /// <summary>
     /// Get last gicc_push or gicc_pull tagged commit
     /// </summary>
     /// <returns></returns>
-    internal string GetLastPP()
+    internal string GetLastPPCommit()
     {
       return GetExecutedResultList("rev-list gicc_push gicc_pull")[0];
     }
@@ -170,7 +175,7 @@ namespace Gicc.Lib
     /// <returns></returns>
     internal Dictionary<string, FileChangeType> GetCommittedFilesAfterLastPP()
     {
-      List<string> changedFileList = GetExecutedResultList("diff --name-status " + GetLastPP());
+      List<string> changedFileList = GetExecutedResultList("diff --name-status " + GetLastPPCommit());
       Dictionary<string, FileChangeType> resultDic = new Dictionary<string, FileChangeType>();
 
       foreach (string changedFile in changedFileList)

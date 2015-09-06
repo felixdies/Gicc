@@ -218,6 +218,11 @@ namespace Gicc.Lib
       Execute("umount \\" + vobTag);
     }
 
+    internal void CheckIn(string pname, string comment)
+    {
+      Execute("checkin -comment " + comment + pname);
+    }
+
     internal void Checkout(string pname)
     {
       Execute("checkout -ncomment " + pname);

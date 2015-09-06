@@ -18,7 +18,7 @@ namespace Gicc.Test
     [Test]
     public void GetLastPushOrPullTest()
     {
-      string lastPushOrPull = new Git(GitInfo).GetLastPP();
+      string lastPushOrPull = new Git(GitInfo).GetLastPPCommit();
       Assert.AreEqual("6acda1797f37b0fae29839d6ccd0ecd1d48a18ae", lastPushOrPull);
     }
 
@@ -68,7 +68,7 @@ namespace Gicc.Test
 			Git gitMockup = new Git(GitMockupInfo);
 			gitMockup.TagPull();
 
-			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 8, 0), gitMockup.GetLastGiccPull());
+			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 8, 0), gitMockup.GetLastGiccPullDate());
 		}
 
 		[Test]
