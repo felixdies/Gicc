@@ -30,13 +30,11 @@ namespace Gicc
     /// <returns></returns>
     public bool IsIgnoredDir(string relDirPath)
     {
+      relDirPath = relDirPath.Replace('/', '\\');
+
       // remove leading slash
       // to use GlobPatternToRegex method, the path shouldn't start with a slash.
-      if (relDirPath.StartsWith("/"))
-      {
-        relDirPath = relDirPath.Substring(1);
-      }
-      else if (relDirPath.StartsWith("\\"))
+      if (relDirPath.StartsWith("\\"))
       {
         relDirPath = relDirPath.Substring(2);
       }
@@ -69,13 +67,11 @@ namespace Gicc
     /// <returns></returns>
     public bool IsIgnoredFile(string relFilePath)
     {
+      relFilePath = relFilePath.Replace('/', '\\');
+
       // remove leading slash
       // to use GlobPatternToRegex method, the path shouldn't start with a slash.
-      if (relFilePath.StartsWith("/"))
-      {
-        relFilePath = relFilePath.Substring(1);
-      }
-      else if (relFilePath.StartsWith("\\"))
+      if (relFilePath.StartsWith("\\"))
       {
         relFilePath = relFilePath.Substring(2);
       }

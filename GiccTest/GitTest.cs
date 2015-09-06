@@ -15,6 +15,29 @@ namespace Gicc.Test
 	[TestFixture]
 	public class GitTest : GiccTestBase
 	{
+    [Test]
+    public void GetLastPushOrPullTest()
+    {
+      string lastPushOrPull = new Git(GitInfo).GetLastPP();
+      Assert.AreEqual("6acda1797f37b0fae29839d6ccd0ecd1d48a18ae", lastPushOrPull);
+    }
+
+    [Test]
+    public void GetCommittedFilesAfterLastPP()
+    {
+      Dictionary<string, FileChangeType> expectedFileList = new Dictionary<string, FileChangeType>()
+      {
+        {"a.txt", FileChangeType.Delete},
+        {"b.txt", FileChangeType.Modification},
+        {"c.txt", FileChangeType.Creation},
+        {"d.txt", FileChangeType.Creation},
+        {"e\\e.txt", FileChangeType.Creation}
+      };
+      Dictionary<string, FileChangeType> actualFileList = new Git(GitInfo).GetCommittedFilesAfterLastPP();
+
+      Assert.That(actualFileList, Is.EquivalentTo(expectedFileList));
+    }
+
 		[Test]
 		public void InitTest()
 		{

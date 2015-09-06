@@ -98,21 +98,6 @@ namespace Gicc.Lib
       }
     }
 
-    internal string Init()
-    {
-      if (!Directory.Exists(RepoPath))
-      {
-        Directory.CreateDirectory(RepoPath);
-      }
-
-      return GetExecutedResult("init");
-    }
-
-    internal string Help()
-    {
-      return GetExecutedResult("help");
-    }
-
     internal void AddCommit(string message, string author)
     {
       Execute("add --all .");
@@ -140,6 +125,11 @@ namespace Gicc.Lib
       Execute("tag -f gicc_pull");
     }
 
+    internal void TagPush()
+    {
+      Execute("tag -f gicc_push");
+    }
+
     internal void Checkout(string branch)
     {
       if (!GetBranchList().Any(existBranch => existBranch.Contains(branch)))
@@ -148,6 +138,65 @@ namespace Gicc.Lib
       }
 
       Execute("checkout " + branch);
+    }
+
+    internal string Init()
+    {
+      if (!Directory.Exists(RepoPath))
+      {
+        Directory.CreateDirectory(RepoPath);
+      }
+
+      return GetExecutedResult("init");
+    }
+
+    internal string Help()
+    {
+      return GetExecutedResult("help");
+    }
+
+    /// <summary>
+    /// Get last gicc_push or gicc_pull tagged commit
+    /// </summary>
+    /// <returns></returns>
+    internal string GetLastPP()
+    {
+      return GetExecutedResultList("rev-list gicc_push gicc_pull")[0];
+    }
+
+    /// <summary>
+    /// Get committed files after last push or pull
+    /// </summary>
+    /// <returns></returns>
+    internal Dictionary<string, FileChangeType> GetCommittedFilesAfterLastPP()
+    {
+      List<string> changedFileList = GetExecutedResultList("diff --name-status " + GetLastPP());
+      Dictionary<string, FileChangeType> resultDic = new Dictionary<string, FileChangeType>();
+
+      foreach (string changedFile in changedFileList)
+      {
+        FileChangeType changeType;
+        string[] splitedArr = changedFile.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+        switch (splitedArr[0])
+        {
+          case "A":
+            changeType = FileChangeType.Creation;
+            break;
+          case "M":
+            changeType = FileChangeType.Modification;
+            break;
+          case "D":
+            changeType = FileChangeType.Delete;
+            break;
+          default:
+            throw new InvalidOperationException("Git 파일 변경 사항은 추가, 수정, 삭제 중 하나여야 합니다.");
+        }
+
+        resultDic.Add(splitedArr[1].Replace('/', '\\'), changeType);
+      }
+
+      return resultDic;
     }
   }
 }

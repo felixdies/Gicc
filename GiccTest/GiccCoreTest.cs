@@ -14,13 +14,19 @@ namespace Gicc.Test
 	[TestFixture]
 	public class GiccCoreTest : GiccTestBase
 	{
+    [Test]
+    public void PushTest()
+    {
+      new GiccCore(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH).Push();
+    }
+		
 		[Test]
 		public void WriteAndParseConfigTest()
 		{
 			Environment.CurrentDirectory = REPO_PATH;
 
 			// write configs
-			new GiccCore (REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH).WriteConfig();
+      new GiccCore(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH).WriteConfig();
 
 			// parse configs
 			GiccCore gicc = new GiccCore(Environment.CurrentDirectory);

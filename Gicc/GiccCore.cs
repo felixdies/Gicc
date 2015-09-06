@@ -131,12 +131,23 @@ namespace Gicc.Lib
 
     public void Push()
     {
-      throw new NotImplementedException();
+      Git git = new Git(CreateGitInfo());
+      ClearCase cc = new ClearCase(CreateCCInfo(this.BranchName));
+
+      cc.CheckCheckedoutFileIsNotExist();
+      git.CheckModifiedFileIsNotExist();
 
       // 1. find commited files after last pull/push tag
+      git.GetCommittedFilesAfterLastPP();
+
       // 2. pull & merge
+
+
       // 3. checkout & copy commited files
+
+
       // 4. tag "push"
+      git.TagPull();
     }
 
     public List<string> ListCCFilesOnBranch(string branchName)
