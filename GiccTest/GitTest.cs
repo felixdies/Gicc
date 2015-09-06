@@ -68,7 +68,7 @@ namespace Gicc.Test
       Git gitMockup = new Git(GitMockupInfo);
       gitMockup.TagPull();
 
-      Assert.AreEqual(new DateTime(2015, 5, 1, 1, 8, 0), gitMockup.GetLastGiccPullDate());
+      Assert.AreEqual(new DateTime(2015, 5, 1, 1, 8, 0), gitMockup.GetLastPPDate());
     }
 
     [Test]

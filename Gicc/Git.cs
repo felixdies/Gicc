@@ -67,18 +67,22 @@ namespace Gicc.Lib
       return GetExecutedResultList("branch");
     }
 
-    internal DateTime GetLastGiccPullDate()
+    /// <summary>
+    /// Get last gicc_push or gicc_pull tagged date.
+    /// </summary>
+    /// <returns></returns>
+    internal DateTime GetLastPPDate()
     {
-      string lastPulledCommit = GetExecutedResult("show-ref --tags gicc_pull");
+      string lastPPCommit = GetLastPPCommit();
 
       // not tagged yet
-      if (string.IsNullOrEmpty(lastPulledCommit))
+      if (string.IsNullOrEmpty(lastPPCommit))
       {
-        return new DateTime(1990, 1, 1);
+        throw new InvalidOperationException("마지막 gicc_push 또는 gicc_pull 시점을 찾지 못했습니다.");
       }
 
-      string lastGiccPullTime = GetExecutedResult("show -s --format=%ai " + lastPulledCommit.Substring(0, 10));
-      return DateTime.Parse(lastGiccPullTime);
+      string lastPPTime = GetExecutedResult("show -s --format=%ai " + lastPPCommit.Substring(0, 10));
+      return DateTime.Parse(lastPPTime);
     }
 
     internal void CheckModifiedFileIsNotExist()

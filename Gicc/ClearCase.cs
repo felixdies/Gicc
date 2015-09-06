@@ -116,15 +116,22 @@ namespace Gicc.Lib
       return GetExecutedResultList("find . " + args + " -print");
     }
 
+    /// <summary>
+    /// Find All checked-in files during the period.
+    /// </summary>
+    /// <param name="since"></param>
+    /// <param name="until"></param>
+    /// <returns></returns>
     public List<string> FindAllFilesInBranch(DateTime since, DateTime until)
     {
       string args = string.Empty;
 
-      if (!string.IsNullOrWhiteSpace(BranchName))
+      if (string.IsNullOrWhiteSpace(BranchName))
       {
-        args += " -branch 'brtype(" + BranchName + ")'";
+        throw new InvalidOperationException("could not find branch name.");
       }
 
+      args += " -branch 'brtype(" + BranchName + ")'";
       args += " -version '{created_since(" + since.AddSeconds(1).ToString() + ") && !created_since(" + until.AddSeconds(1).ToString() + ")}'";
 
       return GetExecutedResultList("find . " + args + " -print");

@@ -144,6 +144,17 @@ namespace Gicc.Lib
       cc.CheckCheckoutNotExists(committedFileDic.Keys.ToList());
 
       // 2. pull & merge
+      if (cc.FindAllFilesInBranch(git.GetLastPPDate(), DateTime.Now).Count > 0)
+      {
+        string message = string.Empty;
+
+        message += "There are new checked-in files in the VOB." + Environment.NewLine;
+        message += "The checked-in file are automatically pulled to the " + BranchName + " branch," + Environment.NewLine; // todo
+        message += "and your commits are moved to the " + BranchName + "_gicctemp branch." + Environment.NewLine; // todo
+        message += "Please merge your commits into the " + BranchName + " branch and execute push again." + Environment.NewLine;
+       
+        throw new GiccException(message);
+      }
 
       // 3. copy commited files after last pull/push tag & checkin
       CopyAndCheckin(committedFileDic,
