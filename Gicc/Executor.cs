@@ -24,9 +24,9 @@ namespace Gicc.Lib
     protected abstract string Command { get; }
 
     protected string ExecutingPath { get; set; }
-    
+
     protected string OutPath { get; set; }
-    
+
     protected string LogPath { get; set; }
 
     /// <summary>

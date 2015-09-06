@@ -45,7 +45,7 @@ namespace Gicc.Test
     [TestCase(@"testresult1/0", true)]
     [TestCase(@"sub/testResult\0", true)]
     [TestCase(@"sub\Testresult1/0", true)]
-		[TestCase(@"file", false)]
+    [TestCase(@"file", false)]
     public void IsIgnoredFileTest(string path, bool expectedResult)
     {
       string gitIgnoreText = Resource.GetResource("gitignore.txt");

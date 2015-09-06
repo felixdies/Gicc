@@ -12,9 +12,9 @@ using Gicc.Lib;
 
 namespace Gicc.Test
 {
-	[TestFixture]
-	public class GitTest : GiccTestBase
-	{
+  [TestFixture]
+  public class GitTest : GiccTestBase
+  {
     [Test]
     public void GetLastPushOrPullTest()
     {
@@ -38,74 +38,74 @@ namespace Gicc.Test
       Assert.That(actualFileList, Is.EquivalentTo(expectedFileList));
     }
 
-		[Test]
-		public void InitTest()
-		{
-			FileEx.DeleteIfExists(Path.Combine(REPO_PATH, ".git"));
+    [Test]
+    public void InitTest()
+    {
+      FileEx.DeleteIfExists(Path.Combine(REPO_PATH, ".git"));
 
-			string expectedStart = "Initialized empty Git repository ";
-			string actual = new Git(GitInfo).Init();
+      string expectedStart = "Initialized empty Git repository ";
+      string actual = new Git(GitInfo).Init();
 
-			Assert.True(actual.StartsWith(expectedStart));
-		}
+      Assert.True(actual.StartsWith(expectedStart));
+    }
 
-		[Test]
-		public void HelpTest()
-		{
-			string expectedStart = "usage: git ";
-			string actual = new Git(GitInfo).Help();
+    [Test]
+    public void HelpTest()
+    {
+      string expectedStart = "usage: git ";
+      string actual = new Git(GitInfo).Help();
 
-			Assert.True(actual.StartsWith(expectedStart));
-		}
+      Assert.True(actual.StartsWith(expectedStart));
+    }
 
-		[Test]
-		public void LastGiccPullTest()
-		{
-			// setup
-			CreateGitTestMockUp();
-			// setup
+    [Test]
+    public void LastGiccPullTest()
+    {
+      // setup
+      CreateGitTestMockUp();
+      // setup
 
-			Git gitMockup = new Git(GitMockupInfo);
-			gitMockup.TagPull();
+      Git gitMockup = new Git(GitMockupInfo);
+      gitMockup.TagPull();
 
-			Assert.AreEqual(new DateTime(2015, 5, 1, 1, 8, 0), gitMockup.GetLastGiccPullDate());
-		}
+      Assert.AreEqual(new DateTime(2015, 5, 1, 1, 8, 0), gitMockup.GetLastGiccPullDate());
+    }
 
-		[Test]
-		public void UntrackedFileListTest()
-		{
-			CreateGitTestMockUp();
-			File.Create(Path.Combine(REPO_MOCKUP_PATH, "untracked1")).Close();
-			File.Create(Path.Combine(REPO_MOCKUP_PATH, "untracked2")).Close();
-			// setup
+    [Test]
+    public void UntrackedFileListTest()
+    {
+      CreateGitTestMockUp();
+      File.Create(Path.Combine(REPO_MOCKUP_PATH, "untracked1")).Close();
+      File.Create(Path.Combine(REPO_MOCKUP_PATH, "untracked2")).Close();
+      // setup
 
-			List<string> expected = new string[] { "untracked1", "untracked2" }.ToList();
-			List<string> actual = new Git(GitMockupInfo).GetUntrackedFileList();
+      List<string> expected = new string[] { "untracked1", "untracked2" }.ToList();
+      List<string> actual = new Git(GitMockupInfo).GetUntrackedFileList();
 
-			Assert.That(actual, Is.EquivalentTo(expected));
+      Assert.That(actual, Is.EquivalentTo(expected));
 
-			// cleanup
-			File.Delete(Path.Combine(REPO_MOCKUP_PATH, "untracked1"));
-			File.Delete(Path.Combine(REPO_MOCKUP_PATH, "untracked2"));
-		}
+      // cleanup
+      File.Delete(Path.Combine(REPO_MOCKUP_PATH, "untracked1"));
+      File.Delete(Path.Combine(REPO_MOCKUP_PATH, "untracked2"));
+    }
 
-		[Test]
-		public void ModifiedFileListTest()
-		{
-			string TT_PATH = Path.Combine(REPO_MOCKUP_PATH, "tt.txt");
-			
-			CreateGitTestMockUp();
-			string stored = File.ReadAllText(TT_PATH);
-			File.WriteAllText(TT_PATH, "modified");
-			// setup
+    [Test]
+    public void ModifiedFileListTest()
+    {
+      string TT_PATH = Path.Combine(REPO_MOCKUP_PATH, "tt.txt");
 
-			List<string> expected = new string[] { "tt.txt" }.ToList();
-			List<string> actual = new Git(GitMockupInfo).GetModifiedFileList();
+      CreateGitTestMockUp();
+      string stored = File.ReadAllText(TT_PATH);
+      File.WriteAllText(TT_PATH, "modified");
+      // setup
 
-			Assert.That(actual, Is.EquivalentTo(expected));
+      List<string> expected = new string[] { "tt.txt" }.ToList();
+      List<string> actual = new Git(GitMockupInfo).GetModifiedFileList();
 
-			// cleanup
-			File.WriteAllText(TT_PATH, stored);
-		}
-	}
+      Assert.That(actual, Is.EquivalentTo(expected));
+
+      // cleanup
+      File.WriteAllText(TT_PATH, stored);
+    }
+  }
 }

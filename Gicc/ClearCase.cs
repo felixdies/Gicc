@@ -306,7 +306,7 @@ namespace Gicc.Lib
 
       GetExecutedResultList("lshistory -fmt " + Fmt + " " + pname)
         .ForEach(elemVersion => resultList.Add(
-          new CCElementVersion(elemVersion) 
+          new CCElementVersion(elemVersion)
           {
             VobPath = this.VobPath
           }));
@@ -320,9 +320,9 @@ namespace Gicc.Lib
 
       GetExecutedResultList("lshistory -fmt " + Fmt + " -since" + since.AddSeconds(1) + " " + pname)
         .ForEach(elemVersion => resultList.Add(
-          new CCElementVersion(elemVersion) 
+          new CCElementVersion(elemVersion)
           {
-            VobPath = this.VobPath 
+            VobPath = this.VobPath
           }));
 
       return resultList;

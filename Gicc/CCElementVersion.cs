@@ -21,38 +21,38 @@ namespace Gicc.Lib
     public string Attributes { get; set; }
 
     public string Comment { get; set; }
-    
+
     public DateTime CreatedDate { get; set; }
-    
+
     public string EventDescription { get; set; }
-    
+
     public string CheckoutInfo { get; set; }
-    
+
     public string HostName { get; set; }
-    
+
     public string IndentLevel { get; set; }
-    
+
     public string Labels { get; set; }
-    
+
     public string ObjectKind { get; set; }
-    
+
     // <summary> Gets or sets relative path from VOB path </summary>
     public string ElementName { get; set; }
-    
+
     public string Version { get; set; }
-    
+
     public string PredecessorVersion { get; set; }
-    
+
     public string Operation { get; set; }
-    
+
     public string Type { get; set; }
-    
+
     public string SymbolicLink { get; set; }
-    
+
     public string OwnerLoginName { get; set; }
-    
+
     public string OwnerFullName { get; set; }
-    
+
     public string HyperLinkInfo { get; set; }
 
     public string VobPath { get; set; }
@@ -85,9 +85,9 @@ namespace Gicc.Lib
     }
 
     public CCElementVersion Predecessor { get; set; }
-    
+
     public CCElementVersion HyperLinkedFrom { get; set; }
-    
+
     public CCElementVersion HyperLinkedTo { get; set; }
 
     public static int CompareVersionsByCreatedDate(CCElementVersion ver1, CCElementVersion ver2)

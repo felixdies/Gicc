@@ -9,9 +9,9 @@ namespace Gicc.Lib
   public class ExecutorConstructInfo
   {
     private string _executingPath;
-    
+
     private string _outPath;
-    
+
     private string _logPath;
 
     public string ExecutingPath
@@ -34,7 +34,7 @@ namespace Gicc.Lib
         _executingPath = value;
       }
     }
-    
+
     public string OutPath
     {
       get
@@ -55,7 +55,7 @@ namespace Gicc.Lib
         _outPath = value;
       }
     }
-    
+
     public string LogPath
     {
       get

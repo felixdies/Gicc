@@ -37,7 +37,7 @@ namespace Gicc.Lib
           string[] gitIgnoreTextArr = File.ReadAllLines(Path.Combine(ExecutingPath, ".gitignore"));
           _gitIgnore = new GitIgnore(gitIgnoreTextArr);
         }
-        
+
         return _gitIgnore;
       }
     }

@@ -84,7 +84,7 @@ namespace Gicc.Lib
           string[] gitIgnoreTextArr = File.ReadAllLines(Path.Combine(RepoPath, ".gitignore"));
           _gitIgnore = new GitIgnore(gitIgnoreTextArr);
         }
-        
+
         return _gitIgnore;
       }
     }
@@ -101,9 +101,9 @@ namespace Gicc.Lib
       WriteConfig();
 
       CopyMainBranchBeforeFirstBranchCheckin(BranchName);
-      
+
       // todo : pull tag
-      
+
       // todo : pull
     }
 
@@ -210,7 +210,7 @@ namespace Gicc.Lib
 
       List<string> mainFileList = mainCC.FindAllFilesInBranch(since, until);
       CopyFiles(mainFileList, VobPath, RepoPath);
-      
+
       git.AddCommit("gicc", author);
       git.TagPull(); // todo : if changed
 
@@ -282,7 +282,7 @@ namespace Gicc.Lib
     {
       ClearCase main = new ClearCase(CreateCCInfo("main"));
       ClearCase branch = new ClearCase(CreateCCInfo(branchName));
-      
+
       List<CCElementVersion> branchVerList = branch.GetAllVersionsInBranch();
       branchVerList.Sort(CCElementVersion.CompareVersionsByCreatedDate);
 
@@ -301,7 +301,7 @@ namespace Gicc.Lib
       // Get the subdirectories for the specified directory.
       DirectoryInfo dir = new DirectoryInfo(sourceDirName);
       DirectoryInfo[] dirs = dir.GetDirectories();
-      
+
       if (!dir.Exists)
       {
         throw new DirectoryNotFoundException(
@@ -338,7 +338,7 @@ namespace Gicc.Lib
         CopyDirectory(subdir.FullName, temppath);
       }
     }
-    
+
     private void ParseAllConfigsFromConfigFile()
     {
       if (!File.Exists(ConfigPath))

@@ -12,220 +12,221 @@ using Gicc.Lib;
 
 namespace Gicc.Test
 {
-	[TestFixture]
-	public class ClearCaseTest : GiccTestBase
-	{
-		string VOB_TAG = System.Configuration.ConfigurationManager.AppSettings["VobTag"];
-		
-		/// <summary>
-		/// main Branch 의 cc 실행 정보.
-		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
-		/// </summary>
-		private ClearCaseConstructInfo MainCCInfo
-		{
-			get
-			{
-				return new ClearCaseConstructInfo()
-				{
-					VobPath = VOB_PATH,
-					BranchName = "main",
-					ExecutingPath = CC_TEST_PATH,
-					OutPath = Path.Combine(GICC_PATH, "ccout"),
-					LogPath = Path.Combine(GICC_PATH, "log")
-				};
-			}
-		}
+  [TestFixture]
+  public class ClearCaseTest : GiccTestBase
+  {
+    string VOB_TAG = System.Configuration.ConfigurationManager.AppSettings["VobTag"];
 
-		/// <summary>
-		/// 특정 Branch 의 cc 실행 정보.
-		/// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
-		/// </summary>
+    /// <summary>
+    /// main Branch 의 cc 실행 정보.
+    /// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
+    /// </summary>
+    private ClearCaseConstructInfo MainCCInfo
+    {
+      get
+      {
+        return new ClearCaseConstructInfo()
+        {
+          VobPath = VOB_PATH,
+          BranchName = "main",
+          ExecutingPath = CC_TEST_PATH,
+          OutPath = Path.Combine(GICC_PATH, "ccout"),
+          LogPath = Path.Combine(GICC_PATH, "log")
+        };
+      }
+    }
+
+    /// <summary>
+    /// 특정 Branch 의 cc 실행 정보.
+    /// cleartool 실행 경로는 언제나 cc 의 VOB path 이다.
+    /// </summary>
     private ClearCaseConstructInfo BranchCCInfo
-		{
-			get
-			{
-				return new ClearCaseConstructInfo()
-				{
-					VobPath = VOB_PATH,
-					BranchName = BRANCH_NAME,
-					ExecutingPath = CC_TEST_PATH,
-					OutPath = Path.Combine(GICC_PATH, "ccout"),
-					LogPath = Path.Combine(GICC_PATH, "log")
-				};
-			}
-		}
+    {
+      get
+      {
+        return new ClearCaseConstructInfo()
+        {
+          VobPath = VOB_PATH,
+          BranchName = BRANCH_NAME,
+          ExecutingPath = CC_TEST_PATH,
+          OutPath = Path.Combine(GICC_PATH, "ccout"),
+          LogPath = Path.Combine(GICC_PATH, "log")
+        };
+      }
+    }
 
-		/// <summary>
-		/// Git 과 상관 없이 CC 를 실행 할 때 사용하는 생성자 정보
-		/// </summary>
+    /// <summary>
+    /// Git 과 상관 없이 CC 를 실행 할 때 사용하는 생성자 정보
+    /// </summary>
     private ExecutorConstructInfo CCInfo
-		{
-			get
-			{
-				return new ExecutorConstructInfo()
-				{
-					BranchName = BRANCH_NAME,
-					ExecutingPath = CC_TEST_PATH,
-					OutPath = "giccout",
-					LogPath = "gicclog"
-				};
-			}
-		}
-		
-		[Test]
-		public void PwdTest()
-		{
-			Assert.AreEqual(CC_TEST_PATH, new ClearCase(BranchCCInfo).Pwd());
-		}
+    {
+      get
+      {
+        return new ExecutorConstructInfo()
+        {
+          BranchName = BRANCH_NAME,
+          ExecutingPath = CC_TEST_PATH,
+          OutPath = "giccout",
+          LogPath = "gicclog"
+        };
+      }
+    }
 
-		[Test]
-		public void FindAllSymbolicLinksTest()
-		{
-			string expected = CC_SYMBOLIC_LINK_PATH;
-			string actual = new ClearCase(BranchCCInfo).FindAllSymbolicLinks()[0].SymbolicLink;
+    [Test]
+    public void PwdTest()
+    {
+      Assert.AreEqual(CC_TEST_PATH, new ClearCase(BranchCCInfo).Pwd());
+    }
 
-			Assert.AreEqual(expected, actual);
-		}
+    [Test]
+    public void FindAllSymbolicLinksTest()
+    {
+      string expected = CC_SYMBOLIC_LINK_PATH;
+      string actual = new ClearCase(BranchCCInfo).FindAllSymbolicLinks()[0].SymbolicLink;
 
-		[Test]
-		// CastCS() is tested as well.
-		public void SetDefaultCSTest()
-		{
-			new ClearCase(BranchCCInfo).SetDefaultCS();
+      Assert.AreEqual(expected, actual);
+    }
 
-			List<string> expected = new List<string>(
+    [Test]
+    // CastCS() is tested as well.
+    public void SetDefaultCSTest()
+    {
+      new ClearCase(BranchCCInfo).SetDefaultCS();
+
+      List<string> expected = new List<string>(
         new string[] { "element * CHECKEDOUT", "element * /main/LATEST" }
-				);
-			List<string> actual = new ClearCase(MainCCInfo).CatCS();
+        );
+      List<string> actual = new ClearCase(MainCCInfo).CatCS();
 
-			Assert.That(actual, Is.EquivalentTo(expected));
-		}
+      Assert.That(actual, Is.EquivalentTo(expected));
+    }
 
-		[Test]
-		// CastCS() is tested as well.
-		public void SetBranchCSTest()
-		{
-			List<string> expected = new List<string>(new string[] {
+    [Test]
+    // CastCS() is tested as well.
+    public void SetBranchCSTest()
+    {
+      List<string> expected = new List<string>(new string[] {
 				"element * CHECKEDOUT",
 				"element -dir * /main/LATEST",
 				"element -file * /main/" + BRANCH_NAME + @"/LATEST",
 				"element -file * /main/LATEST -mkbranch " + BRANCH_NAME
 			});
 
-			new ClearCase(BranchCCInfo).SetBranchCS();
+      new ClearCase(BranchCCInfo).SetBranchCS();
 
-			Assert.That(new ClearCase(BranchCCInfo).CatCS(), Is.EquivalentTo(expected));
+      Assert.That(new ClearCase(BranchCCInfo).CatCS(), Is.EquivalentTo(expected));
 
-			// teardown
-			new ClearCase(BranchCCInfo).SetDefaultCS();
-		}
+      // teardown
+      new ClearCase(BranchCCInfo).SetDefaultCS();
+    }
 
-		[Test]
-		public void CurrentViewTest()
-		{
-			Assert.AreEqual(ConfigurationManager.AppSettings["ViewName"], new ClearCase(BranchCCInfo).GetCurrentView());
-		}
+    [Test]
+    public void CurrentViewTest()
+    {
+      Assert.AreEqual(ConfigurationManager.AppSettings["ViewName"], new ClearCase(BranchCCInfo).GetCurrentView());
+    }
 
-		[Test]
-		public void LogInUserTest()
-		{
-			Assert.AreEqual(ConfigurationManager.AppSettings["LogInUser"], new ClearCase(BranchCCInfo).GetLogInUser());
-		}
-		
-		[Test]
-		public void LogInUserNameTest()
-		{
-			Assert.AreEqual(ConfigurationManager.AppSettings["LogInUserName"], new ClearCase(BranchCCInfo).GetLogInUserName());
-		}
+    [Test]
+    public void LogInUserTest()
+    {
+      Assert.AreEqual(ConfigurationManager.AppSettings["LogInUser"], new ClearCase(BranchCCInfo).GetLogInUser());
+    }
 
-		[Test]
-		public void CheckoutTest()
-		{
-			ClearCase cc = new ClearCase(BranchCCInfo);
-			cc.SetBranchCS();
+    [Test]
+    public void LogInUserNameTest()
+    {
+      Assert.AreEqual(ConfigurationManager.AppSettings["LogInUserName"], new ClearCase(BranchCCInfo).GetLogInUserName());
+    }
+
+    [Test]
+    public void CheckoutTest()
+    {
+      ClearCase cc = new ClearCase(BranchCCInfo);
+      cc.SetBranchCS();
 
       List<string> targetFiles = new List<string>(new string[] { "main.txt", @".\sub\main.txt" });
-			List<string> actual;
-			
-			cc.Checkout(targetFiles[0]);
-			cc.Checkout(targetFiles[1]);
+      List<string> actual;
 
-			actual = cc.LscheckoutInCurrentViewByLoginUser();
+      cc.Checkout(targetFiles[0]);
+      cc.Checkout(targetFiles[1]);
 
-			Assert.That(actual, Is.EquivalentTo(targetFiles));
+      actual = cc.LscheckoutInCurrentViewByLoginUser();
 
-			cc.Uncheckout(targetFiles[0]);
-			cc.Uncheckout(targetFiles[1]);
+      Assert.That(actual, Is.EquivalentTo(targetFiles));
 
-			actual = cc.LscheckoutInCurrentViewByLoginUser();
-			
-			Assert.IsTrue(actual.Count == 0);
-		}
-		
-		[Test]
-		public void CheckAllSymbolicLinksAreMountedTest()
-		{
+      cc.Uncheckout(targetFiles[0]);
+      cc.Uncheckout(targetFiles[1]);
+
+      actual = cc.LscheckoutInCurrentViewByLoginUser();
+
+      Assert.IsTrue(actual.Count == 0);
+    }
+
+    [Test]
+    public void CheckAllSymbolicLinksAreMountedTest()
+    {
       ExecutorConstructInfo VobInfo = new ExecutorConstructInfo()
       {
-				ExecutingPath = VOB_PATH,
-				OutPath = "giccout",
-				LogPath = "gicclog"
-			};
+        ExecutingPath = VOB_PATH,
+        OutPath = "giccout",
+        LogPath = "gicclog"
+      };
 
-      ExecutorConstructInfo ParentOfVobInfo = new ExecutorConstructInfo(){
-				ExecutingPath = Path.GetDirectoryName(VOB_PATH),
-				OutPath = "giccout",
-				LogPath = "gicclog"
-			};
+      ExecutorConstructInfo ParentOfVobInfo = new ExecutorConstructInfo()
+      {
+        ExecutingPath = Path.GetDirectoryName(VOB_PATH),
+        OutPath = "giccout",
+        LogPath = "gicclog"
+      };
 
-			new ClearCase(ParentOfVobInfo).Mount(VOB_TAG);
+      new ClearCase(ParentOfVobInfo).Mount(VOB_TAG);
 
-			// Assert this method doesn't throw an exception
-			new ClearCase(VobInfo).CheckAllSymbolicLinksAreMounted();
+      // Assert this method doesn't throw an exception
+      new ClearCase(VobInfo).CheckAllSymbolicLinksAreMounted();
 
-			new ClearCase(ParentOfVobInfo).UMount(VOB_TAG);
-			try
-			{
-				new ClearCase(VobInfo).CheckAllSymbolicLinksAreMounted();
-			}
-			catch (GiccException ex)
-			{
-				Console.WriteLine(ex.Message);
-				return;
-			}
+      new ClearCase(ParentOfVobInfo).UMount(VOB_TAG);
+      try
+      {
+        new ClearCase(VobInfo).CheckAllSymbolicLinksAreMounted();
+      }
+      catch (GiccException ex)
+      {
+        Console.WriteLine(ex.Message);
+        return;
+      }
 
-			Assert.Fail(VOB_TAG + " 가 unmount 되었으나 유효성 검사를 통과 하였습니다.");
-		}
+      Assert.Fail(VOB_TAG + " 가 unmount 되었으나 유효성 검사를 통과 하였습니다.");
+    }
 
-		[Test]
-		public void CheckAnyFileIsNotCheckedOutTest()
-		{
-			string checkoutFile = "main.txt";
+    [Test]
+    public void CheckAnyFileIsNotCheckedOutTest()
+    {
+      string checkoutFile = "main.txt";
 
-			ClearCase cc = new ClearCase(BranchCCInfo);
-			
-			cc.CheckCheckedoutFileIsNotExist();
+      ClearCase cc = new ClearCase(BranchCCInfo);
 
-			cc.Checkout(checkoutFile);
+      cc.CheckCheckedoutFileIsNotExist();
 
-			try
-			{
-				cc.CheckCheckedoutFileIsNotExist();
-			}
-			catch (GiccException ex)
-			{
-				Console.WriteLine("success : caught checkedout file");
-				Console.WriteLine(ex.Message);
+      cc.Checkout(checkoutFile);
 
-				return;
-			}
-			finally
-			{
-				cc.Uncheckout(checkoutFile);
-			}
+      try
+      {
+        cc.CheckCheckedoutFileIsNotExist();
+      }
+      catch (GiccException ex)
+      {
+        Console.WriteLine("success : caught checkedout file");
+        Console.WriteLine(ex.Message);
 
-			Assert.Fail("could not catch checkout file : " + checkoutFile);
-		}
+        return;
+      }
+      finally
+      {
+        cc.Uncheckout(checkoutFile);
+      }
+
+      Assert.Fail("could not catch checkout file : " + checkoutFile);
+    }
 
     [TestCase(@"test.aspx@@/main/5", true)]
     [TestCase(@"test.ascx@@/main/5", true)]
@@ -243,5 +244,5 @@ namespace Gicc.Test
 
       Assert.AreEqual(result, cc.IsLabelingTargetExtension(path));
     }
-	}
+  }
 }
