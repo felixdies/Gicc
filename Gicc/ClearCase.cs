@@ -130,13 +130,28 @@ namespace Gicc.Lib
       return GetExecutedResultList("find . " + args + " -print");
     }
 
-    internal void CheckCheckedoutFileIsNotExist()
+    internal void CheckCheckedoutFileNotExistsInCurrentView()
     {
       List<string> checkedoutFileList = LscheckoutInCurrentView();
       if (checkedoutFileList.Count > 0)
       {
-        string message = "체크아웃 된 파일이 있습니다." + Environment.NewLine
+        string message = "다음 파일이 이미 체크아웃 되어 있으므로 작업을 완료할 수 없습니다." + Environment.NewLine
           + string.Join(Environment.NewLine, checkedoutFileList);
+        throw new GiccException(message);
+      }
+    }
+
+    /// <summary>
+    /// Check any of given files are not checked-out.
+    /// </summary>
+    /// <param name="checkingFileList"></param>
+    internal void CheckCheckoutNotExists(List<string> fileList)
+    {
+      List<string> checkoutFileList = GetCheckedoutFilesInBranch(fileList);
+      if (checkoutFileList.Count > 0)
+      {
+        string message = "다음 파일이 이미 체크아웃 되어 있으므로 작업을 완료할 수 없습니다." + Environment.NewLine
+          + string.Join(Environment.NewLine, checkoutFileList);
         throw new GiccException(message);
       }
     }
@@ -264,6 +279,29 @@ namespace Gicc.Lib
     {
       string description = GetExecutedResult("describe -fmt " + Fmt + " " + pname);
       return new CCElementVersion(description) { VobPath = this.VobPath };
+    }
+
+    /// <summary>
+    /// Get reserved checked-out files in the working branch, if the file is in the given file list.
+    /// </summary>
+    /// <param name="fileList"></param>
+    /// <returns></returns>
+    internal List<string> GetCheckedoutFilesInBranch(List<string> fileList)
+    {
+      List<string> resultCheckedoutFileList = new List<string>();
+      List<string> checkedoutFilesInBranch = GetExecutedResultList("lscheckout -short -branch 'brtype(" + BranchName + ")' -recurse");
+
+      foreach (string checkedoutFile in checkedoutFilesInBranch)
+      {
+        string trimmedcheckedoutFile = checkedoutFile.StartsWith(".\\") ? checkedoutFile.Substring(2) : checkedoutFile;
+
+        if (fileList.Contains(trimmedcheckedoutFile))
+        {
+          resultCheckedoutFileList.Add(trimmedcheckedoutFile);
+        }
+      }
+
+      return resultCheckedoutFileList;
     }
 
     internal List<string> LscheckoutInCurrentViewByLoginUser()

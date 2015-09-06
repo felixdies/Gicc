@@ -86,6 +86,7 @@ namespace Gicc.Lib
       if (GetUntrackedFileList().Count > 0)
       {
         string message = "새로 추가된 후 commit 되지 않은 파일이 있습니다." + Environment.NewLine;
+        message += "해당 파일을 무시하려면 .gitignore 에 추가하세요." + Environment.NewLine;
         message += string.Join(Environment.NewLine, GetUntrackedFileList());
         throw new GiccException(message);
       }

@@ -114,7 +114,7 @@ namespace Gicc.Lib
       List<CCElementVersion> ccHistory = new List<CCElementVersion>();
 
       ////cc.CheckAllSymbolicLinksAreMounted(); // symbolic link 는 nuget 으로 관리
-      cc.CheckCheckedoutFileIsNotExist();
+      cc.CheckCheckedoutFileNotExistsInCurrentView();
       git.CheckModifiedFileIsNotExist();
 
       cc.FindAllFilesInBranch()
@@ -129,23 +129,29 @@ namespace Gicc.Lib
       throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// git repository 의 작업사항을 cc VOB 에 push 합니다.
+    /// </summary>
     public void Push()
     {
       Git git = new Git(CreateGitInfo());
       ClearCase cc = new ClearCase(CreateCCInfo(this.BranchName));
 
+      Dictionary<string, FileChangeType> committedFileDic = git.GetCommittedFilesAfterLastPP();
+
       // 1. validateion
-      cc.CheckCheckedoutFileIsNotExist();
       git.CheckModifiedFileIsNotExist();
+      cc.CheckCheckoutNotExists(committedFileDic.Keys.ToList());
 
       // 2. pull & merge
 
       // 3. copy commited files after last pull/push tag & checkin
-      CopyAndCheckin(git.GetCommittedFilesAfterLastPP()
-        , "checked in with gicc" + Environment.NewLine + "-git commit id : " + git.GetHeadCommitId());
+      CopyAndCheckin(committedFileDic,
+        "checked in with gicc" + Environment.NewLine
+        + "-git commit id : " + git.GetHeadCommitId());
 
       // 4. tag "push"
-      git.TagPull();
+      git.TagPush();
     }
 
     internal void CopyAndCheckin(Dictionary<string, FileChangeType> committedFileDic, string checkInComment)
@@ -166,7 +172,7 @@ namespace Gicc.Lib
             cc.CheckIn(Path.Combine(VobPath, kvp.Key), checkInComment);
             break;
           case FileChangeType.Delete:
-            // 구현하지 않을 예정.
+            // Will not implement.
             break;
           default:
             throw new InvalidOperationException("Git 파일 변경 사항은 추가, 수정, 삭제 중 하나여야 합니다.");

@@ -205,13 +205,13 @@ namespace Gicc.Test
 
       ClearCase cc = new ClearCase(BranchCCInfo);
 
-      cc.CheckCheckedoutFileIsNotExist();
+      cc.CheckCheckedoutFileNotExistsInCurrentView();
 
       cc.Checkout(checkoutFile);
 
       try
       {
-        cc.CheckCheckedoutFileIsNotExist();
+        cc.CheckCheckedoutFileNotExistsInCurrentView();
       }
       catch (GiccException ex)
       {
