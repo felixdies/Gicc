@@ -110,8 +110,10 @@ namespace Gicc.Lib
 
       if (!string.IsNullOrWhiteSpace(BranchName))
       {
-        args += " -branch 'brtype(" + BranchName + ")'";
+        throw new InvalidOperationException("could not find branch name.");
       }
+
+      args += " -branch 'brtype(" + BranchName + ")'";
 
       return GetExecutedResultList("find . " + args + " -print");
     }

@@ -103,26 +103,48 @@ namespace Gicc.Lib
       }
     }
 
+    internal void AddCommit(string message)
+    {
+      Execute("add --all .");
+      Commit(message);
+    }
+
+    internal void AddCommit(string message, DateTime date)
+    {
+      Execute("add --all .");
+      Commit(message, date);
+    }
+
     internal void AddCommit(string message, string author)
     {
       Execute("add --all .");
       Commit(message, author);
     }
 
-    internal void AddCommit(string message, string author, string date)
+    internal void AddCommit(string message, string author, DateTime date)
     {
       Execute("add --all .");
       this.Commit(message, author, date);
     }
 
-    internal void Commit(string message, string author)
+    internal void Commit(string message)
     {
-      this.Commit(message, author, DateTime.Now.ToString());
+      this.Commit(message, DateTime.Now);
     }
 
-    internal void Commit(string message, string author, string date)
+    internal void Commit(string message, DateTime date)
     {
-      Execute("commit --author='" + author + "' --date='" + date + "' -am '" + message + "'");
+      Execute("commit --date='" + date.ToString() + "' -am '" + message + "'");
+    }
+
+    internal void Commit(string message, string author)
+    {
+      this.Commit(message, author, DateTime.Now);
+    }
+
+    internal void Commit(string message, string author, DateTime date)
+    {
+      Execute("commit --author='" + author + "' --date='" + date.ToString() + "' -am '" + message + "'");
     }
 
     internal void TagPull()
@@ -162,7 +184,7 @@ namespace Gicc.Lib
 
     internal string GetHeadCommitId()
     {
-      return GetExecutedResult("git rev-list head -1");
+      return GetExecutedResult("rev-list head -1");
     }
 
     /// <summary>

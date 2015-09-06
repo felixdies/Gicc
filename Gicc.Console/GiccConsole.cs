@@ -27,14 +27,43 @@ namespace Gicc.Console
       {
         case "clone":
           Clone(args);
+          WriteLine("Clone success!");
           break;
 
         case "pull":
-          new GiccCore(Environment.CurrentDirectory).Pull();
+          if (args.Length == 2)
+          {
+            new GiccCore(Environment.CurrentDirectory).Pull();
+          }
+          else
+          {
+            WriteLine(Resource.USAGE_PULL);
+          }
+          WriteLine("Pull success!");
           break;
 
         case "push":
-          new GiccCore(Environment.CurrentDirectory).Push();
+          if (args.Length == 2)
+          {
+            new GiccCore(Environment.CurrentDirectory).PushWorkingBranch();
+          }
+          else
+          {
+            WriteLine(Resource.USAGE_PUSH);
+          }
+          WriteLine("Push success!");
+          break;
+
+        case "merge":
+          if (args.Length == 2)
+          {
+            new GiccCore(Environment.CurrentDirectory).MergeWorkingBranchIntoMaster();
+          }
+          else
+          {
+            //WriteLine(Resource.USAGE_MERGE);
+          }
+          WriteLine("Merge success!");
           break;
 
         case "list":

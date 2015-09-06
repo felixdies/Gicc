@@ -17,7 +17,7 @@ namespace Gicc.Test
     [Test]
     public void PushTest()
     {
-      new GiccCore(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH).Push();
+      new GiccCore(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH).PushWorkingBranch();
     }
 
     [Test]
@@ -26,7 +26,7 @@ namespace Gicc.Test
       Environment.CurrentDirectory = REPO_PATH;
 
       // write configs
-      new GiccCore(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH).WriteConfig();
+      new GiccCore(REPO_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_PATH).WriteGiccConfig();
 
       // parse configs
       GiccCore gicc = new GiccCore(Environment.CurrentDirectory);

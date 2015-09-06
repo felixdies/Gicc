@@ -274,52 +274,52 @@ namespace Gicc.Test
       Directory.CreateDirectory(Path.Combine(REPO_MOCKUP_PATH, @".git/gicc"));
 
       Environment.CurrentDirectory = REPO_MOCKUP_PATH;
-      new GiccCore(REPO_MOCKUP_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_MOCKUP_PATH).WriteConfig();
+      new GiccCore(REPO_MOCKUP_PATH, CC_TEST_PATH, BRANCH_NAME, REPO_MOCKUP_PATH).WriteGiccConfig();
 
       git.Init();
       File.WriteAllText(tt, string.Empty);
       Directory.CreateDirectory("sub");
       File.WriteAllText(subtt, string.Empty);
-      git.AddCommit("first commit", "First <F@F.F>", commitTime.ToString());
+      git.AddCommit("first commit", "First <F@F.F>", commitTime);
 
       git.Checkout(BRANCH_NAME);
       File.WriteAllText(tt, "A1" + nl);
       File.WriteAllText(subtt, "A2" + nl);
-      git.AddCommit("A1", authorA, commitTime.AddMinutes(1).ToString());
+      git.AddCommit("A1", authorA, commitTime.AddMinutes(1));
 
       git.Checkout("master");
       File.WriteAllText(tt, "B3" + nl);
       File.WriteAllText(subtt, "B4" + nl);
-      git.AddCommit("B2", authorB, commitTime.AddMinutes(2).ToString());
+      git.AddCommit("B2", authorB, commitTime.AddMinutes(2));
 
       git.Checkout("master");
       File.WriteAllText(subtt, "A5" + nl);
-      git.AddCommit("A3", authorA, commitTime.AddMinutes(3).ToString());
+      git.AddCommit("A3", authorA, commitTime.AddMinutes(3));
 
       git.Checkout(BRANCH_NAME);
       File.WriteAllText(tt, "A6" + nl);
       File.WriteAllText(subtt, "A7" + nl);
       File.WriteAllText(tt, "A8" + nl); // write again(cc history)
-      git.AddCommit("A4", authorA, commitTime.AddMinutes(4).ToString());
+      git.AddCommit("A4", authorA, commitTime.AddMinutes(4));
 
       git.Checkout(BRANCH_NAME);
       File.WriteAllText(subtt, "B9" + nl);
-      git.AddCommit("B5", authorB, commitTime.AddMinutes(5).ToString());
+      git.AddCommit("B5", authorB, commitTime.AddMinutes(5));
 
       git.Checkout("master");
       File.WriteAllText(tt, "A10" + nl);
       File.WriteAllText(subtt, "A11" + nl);
-      git.AddCommit("A6", authorA, commitTime.AddMinutes(6).ToString());
+      git.AddCommit("A6", authorA, commitTime.AddMinutes(6));
 
       // rever A6
       git.Checkout("master");
       File.WriteAllText(tt, "B3" + nl);
-      git.AddCommit("A7", authorA, commitTime.AddMinutes(7).ToString());
+      git.AddCommit("A7", authorA, commitTime.AddMinutes(7));
 
       // revert A6
       git.Checkout("master");
       File.WriteAllText(subtt, "A5" + nl);
-      git.AddCommit("B8", authorB, commitTime.AddMinutes(8).ToString());
+      git.AddCommit("B8", authorB, commitTime.AddMinutes(8));
 
       Environment.CurrentDirectory = cachedCWD;
     }

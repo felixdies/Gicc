@@ -92,21 +92,26 @@ namespace Gicc.Lib
     public void Clone()
     {
       Git git = new Git(CreateGitInfo());
+      ClearCase cc = new ClearCase(CreateCCInfo(BranchName));
 
       git.Init();
 
       // move to git repository.
       CWD = git.RepoPath;
 
-      WriteConfig();
+      WriteGiccConfig();
 
       CopyMainBranchBeforeFirstBranchCheckin(BranchName);
+      git.AddCommit("gicc initialize", cc.GetAllVersionsInBranch().Min(version => version.CreatedDate).AddSeconds(-1));
+      git.TagPull();
 
-      // todo : pull tag
-
-      // todo : pull
+      Pull();
     }
 
+    /// <summary>
+    /// Pull changes from cc main branch and cc working branch.
+    /// All changes after the last gicc_push or gicc_pull tagged commit will be pulled.
+    /// </summary>
     public void Pull()
     {
       Git git = new Git(CreateGitInfo());
@@ -117,22 +122,25 @@ namespace Gicc.Lib
       cc.CheckCheckedoutFileNotExistsInCurrentView();
       git.CheckModifiedFileIsNotExist();
 
-      cc.FindAllFilesInBranch()
+      cc.FindAllFilesInBranch(git.GetLastPPDate(), DateTime.Now)
         .ForEach(file => ccHistory.AddRange(cc.Lshistory(file)));
+
+      // todo: GetCommitPoints 와 CopyAndCommit 로직이 이상하다.
+      // branch 내의 파일로 GetCommitPoints 를 잡는데, CopyAndCommit 에서 메인 브랜치를 pull 할 때 이를 이용한다.
+      // 이러면 main branch 를 제대로 pull 할 수 없다.
+      throw new NotImplementedException();
 
       List<DateTime> commitPoints = GetCommitPoints(ccHistory);
       for (int i = 0; i < commitPoints.Count - 2; i++)
       {
-        CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]); // todo: pull/push tag 가 since 가 돼야 함
+        CopyAndCommit(ccHistory, commitPoints[i], commitPoints[i + 1]);
       }
-
-      throw new NotImplementedException();
     }
 
     /// <summary>
-    /// git repository 의 작업사항을 cc VOB 에 push 합니다.
+    /// git repository 의 working branch 작업사항을 cc branch 에 push 합니다.
     /// </summary>
-    public void Push()
+    public void PushWorkingBranch()
     {
       Git git = new Git(CreateGitInfo());
       ClearCase cc = new ClearCase(CreateCCInfo(this.BranchName));
@@ -140,6 +148,7 @@ namespace Gicc.Lib
       Dictionary<string, FileChangeType> committedFileDic = git.GetCommittedFilesAfterLastPP();
 
       // 1. validateion
+      CheckCurrentBranchEqualsToWorkingBranch(git);
       git.CheckModifiedFileIsNotExist();
       cc.CheckCheckoutNotExists(committedFileDic.Keys.ToList());
 
@@ -149,8 +158,10 @@ namespace Gicc.Lib
         string message = string.Empty;
 
         message += "There are new checked-in files in the VOB." + Environment.NewLine;
-        message += "The checked-in file are automatically pulled to the " + BranchName + " branch," + Environment.NewLine; // todo
-        message += "and your commits are moved to the " + BranchName + "_gicctemp branch." + Environment.NewLine; // todo
+        // todo : checkout _gicctemp branch, reset --hard before pull
+        message += "The checked-in file are automatically pulled to the " + BranchName + " branch," + Environment.NewLine;
+        // todo : move to _gicctemp branch
+        message += "and your commits are moved to the " + BranchName + "_gicctemp branch." + Environment.NewLine;
         message += "Please merge your commits into the " + BranchName + " branch and execute push again." + Environment.NewLine;
        
         throw new GiccException(message);
@@ -163,6 +174,22 @@ namespace Gicc.Lib
 
       // 4. tag "push"
       git.TagPush();
+    }
+
+    /// <summary>
+    /// Merge working branch's commits into master branch and push the merged change to cc main branch.
+    /// </summary>
+    public void MergeWorkingBranchIntoMaster()
+    {
+      throw new NotImplementedException();
+    }
+
+    private void CheckCurrentBranchEqualsToWorkingBranch(Git git)
+    {
+      if (git.GetCurrentBranch() != BranchName)
+      {
+        throw new InvalidOperationException("The working branch is " + BranchName + ", but the now in " + git.GetCurrentBranch() + ".");
+      }
     }
 
     internal void CopyAndCheckin(Dictionary<string, FileChangeType> committedFileDic, string checkInComment)
@@ -202,7 +229,7 @@ namespace Gicc.Lib
     /// <summary>
     /// Config 파일에 VobPath, BranchName, RepoPath 속성을 기록한다.
     /// </summary>
-    internal void WriteConfig()
+    internal void WriteGiccConfig()
     {
       string[] configArr = new string[]
       {
@@ -300,10 +327,7 @@ namespace Gicc.Lib
       ClearCase main = new ClearCase(CreateCCInfo("main"));
       ClearCase branch = new ClearCase(CreateCCInfo(branchName));
 
-      List<CCElementVersion> branchVerList = branch.GetAllVersionsInBranch();
-      branchVerList.Sort(CCElementVersion.CompareVersionsByCreatedDate);
-
-      DateTime firstCheckinDate = branchVerList[0].CreatedDate;
+      DateTime firstCheckinDate = branch.GetAllVersionsInBranch().Min(version => version.CreatedDate);
 
       main.SetMainCS(firstCheckinDate.AddSeconds(-1));
 
